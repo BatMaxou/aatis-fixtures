@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Service;
+namespace Aatis\FixturesBundle\Service;
+
+use Aatis\FixturesBundle\Service\EntitiesDictionary;
 
 class ModelsGenerator
 {

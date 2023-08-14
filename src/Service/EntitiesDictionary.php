@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Service;
+namespace Aatis\FixturesBundle\Service;
 
-use ReflectionClass;
+use Aatis\FixturesBundle\Service\EntitiesInfosGenerator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 class EntitiesDictionary
 {
     private array $infos;
 
-    public function __construct(
-        EntitiesInfosGenerator $generator
-    ) {
+    public function __construct(EntitiesInfosGenerator $generator)
+    {
         $this->infos = $generator->generate();
     }
 
@@ -64,7 +63,7 @@ class EntitiesDictionary
             return null;
         }
 
-        $reflection = new ReflectionClass($this->infos[$entityName]['class']);
+        $reflection = new \ReflectionClass($this->infos[$entityName]['class']);
         $properties = $reflection->getProperties();
 
         $accurateProperties = [];

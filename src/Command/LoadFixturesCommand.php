@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Command;
+namespace Aatis\FixturesBundle\Command;
 
 use Symfony\Component\Yaml\Yaml;
-use App\Service\FixturesLoader;
-use App\Exception\ConfigNotFoundException;
-use App\Exception\ExecuteCommandException;
+use Aatis\FixturesBundle\Service\FixturesLoader;
+use Aatis\FixturesBundle\Exception\ConfigNotFoundException;
+use Aatis\FixturesBundle\Exception\ExecuteCommandException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
@@ -17,15 +17,14 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:load:fixtures',
+    name: 'aatis:load:fixtures',
 )]
 class LoadFixturesCommand extends Command
 {
     private FixturesLoader $loader;
 
-    function __construct(
-        FixturesLoader $loader
-    ) {
+    function __construct(FixturesLoader $loader)
+    {
         parent::__construct();
         $this->loader = $loader;
     }

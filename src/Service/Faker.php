@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Service;
+namespace Aatis\FixturesBundle\Service;
 
-use App\Service\FakerProvider;
-use App\Exception\Faker\IntRangeException;
-use App\Exception\Faker\RoundException;
+use Aatis\FixturesBundle\Service\FakerProvider;
+use Aatis\FixturesBundle\Exception\Faker\IntRangeException;
+use Aatis\FixturesBundle\Exception\Faker\RoundException;
 
 class Faker
 {

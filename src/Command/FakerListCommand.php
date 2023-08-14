@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Command;
+namespace Aatis\FixturesBundle\Command;
 
-use App\Service\Faker;
+use Aatis\FixturesBundle\Service\Faker;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:faker:list',
+    name: 'aatis:faker:list',
 )]
 class FakerListCommand extends Command
 {
@@ -28,7 +28,7 @@ class FakerListCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Generate the models for the currents entities');
+            ->setDescription('List all the method of the faker');
     }
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

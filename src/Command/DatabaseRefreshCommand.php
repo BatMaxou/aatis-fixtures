@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Command;
+namespace Aatis\FixturesBundle\Command;
 
 use Doctrine\DBAL\Connection;
-use App\Service\EntitiesDictionary;
-use App\Exception\TruncateException;
-use App\Exception\TableNotFoundException;
-use App\Exception\ExecuteCommandException;
+use Aatis\FixturesBundle\Service\EntitiesDictionary;
+use Aatis\FixturesBundle\Exception\TruncateException;
+use Aatis\FixturesBundle\Exception\TableNotFoundException;
+use Aatis\FixturesBundle\Exception\ExecuteCommandException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:database:refresh'
+    name: 'aatis:database:refresh'
 )]
 class DatabaseRefreshCommand extends Command
 {

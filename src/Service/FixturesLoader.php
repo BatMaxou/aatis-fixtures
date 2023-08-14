@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Service;
+namespace Aatis\FixturesBundle\Service;
 
-use App\Exception\ClassNotFoundExcepton;
-use App\Exception\EntityNotFoundException;
-use App\Exception\MissingArgumentException;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Aatis\FixturesBundle\Service\EntitiesDictionary;
+use Aatis\FixturesBundle\Exception\ClassNotFoundExcepton;
+use Aatis\FixturesBundle\Exception\ClassNotFoundException;
+use Aatis\FixturesBundle\Exception\EntityNotFoundException;
+use Aatis\FixturesBundle\Exception\MissingArgumentException;
 
 class FixturesLoader
 {
@@ -23,6 +25,7 @@ class FixturesLoader
      * 
      * @throws ClassNotFoundException
      * @throws EntityNotFoundException
+     * @throws MissingArgumentException
      */
     public function load(array $yaml, SymfonyStyle $io, array $tables = []): bool
     {

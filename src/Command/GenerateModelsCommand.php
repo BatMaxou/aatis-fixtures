@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Command;
+namespace Aatis\FixturesBundle\Command;
 
-use App\Service\ModelsGenerator;
+use Aatis\FixturesBundle\Service\ModelsGenerator;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:model:generate',
+    name: 'aatis:model:generate',
 )]
 class GenerateModelsCommand extends Command
 {
