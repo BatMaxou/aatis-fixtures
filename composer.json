@@ -1,0 +1,25 @@
+{
+    "name": "aatis/symfony-fixtures",
+    "description": "Allows you to easily create fixtures on your symfony project.",
+    "type": "library",
+    "require": {
+        "php": ">=8.1",
+        "doctrine/doctrine-bundle": "^2.10",
+        "doctrine/doctrine-migrations-bundle": "^3.2",
+        "doctrine/orm": "^2.15",
+        "symfony/yaml": "6.3.*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Aatis\\SymfonyFixtures\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Batmaxou",
+            "email": "maximebatista.lycee@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
