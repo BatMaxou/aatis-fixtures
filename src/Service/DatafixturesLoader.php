@@ -7,7 +7,7 @@ use App\Exception\EntityNotFoundException;
 use App\Exception\MissingArgumentException;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DatafixturesLoader
+class FixturesLoader
 {
     private array $repositories;
 
