@@ -1,5 +1,5 @@
 {
-    "name": "aatis/symfony-fixtures",
+    "name": "aatis/fixtures",
     "description": "Allows you to easily create fixtures on your symfony project.",
     "type": "library",
     "require": {
