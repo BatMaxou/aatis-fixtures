@@ -3,7 +3,7 @@
 namespace App\Command;
 
 use Symfony\Component\Yaml\Yaml;
-use App\Service\DatafixturesLoader;
+use App\Service\FixturesLoader;
 use App\Exception\ConfigNotFoundException;
 use App\Exception\ExecuteCommandException;
 use Symfony\Component\Console\Command\Command;
@@ -17,14 +17,14 @@ use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:load:datafixtures',
+    name: 'app:load:fixtures',
 )]
-class LoadDatafixturesCommand extends Command
+class LoadFixturesCommand extends Command
 {
-    private DatafixturesLoader $loader;
+    private FixturesLoader $loader;
 
     function __construct(
-        DatafixturesLoader $loader
+        FixturesLoader $loader
     ) {
         parent::__construct();
         $this->loader = $loader;
@@ -33,9 +33,9 @@ class LoadDatafixturesCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Insert datafixtures')
+            ->setDescription('Insert fixtures')
             ->setHelp('Clear the database and insert the data provided into jeu_essai.yaml.')
-            ->addOption('force', '-f', InputOption::VALUE_NONE, 'Allows to clear the database and to insert the datafixtures.')
+            ->addOption('force', '-f', InputOption::VALUE_NONE, 'Allows to clear the database and to insert the fixtures.')
             ->addArgument('table', InputArgument::IS_ARRAY, 'You can precise one or severals table to truncate in particular.');
     }
 
@@ -51,16 +51,14 @@ class LoadDatafixturesCommand extends Command
 
         $def = new InputDefinition();
         $def->addOption(new InputOption('force'));
-        $def->addOption(new InputOption('datafixtures'));
 
         $refreshInput = new ArrayInput([], $def);
         $refreshInput->setOption('force', true);
-        $refreshInput->setOption('datafixtures', true);
 
         $refresh = $this->getApplication()->find('app:database:refresh');
         if ($refresh->execute($input, $output) === 1) throw new ExecuteCommandException('Problem raise during the refresh of the database');
 
-        if (!$yaml = Yaml::parseFile('./datafixtures/config.yaml')) throw new ConfigNotFoundException('File "datafixtures/config.yaml" doesn\'t exist');
+        if (!$yaml = Yaml::parseFile('./fixtures/config.yaml')) throw new ConfigNotFoundException('File "fixtures/config.yaml" doesn\'t exist');
 
         $tables = [];
         if (isset($input->getArguments()['table'])) {
