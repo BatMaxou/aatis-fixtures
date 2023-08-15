@@ -1,9 +1,10 @@
 {
     "name": "aatis/fixtures",
     "description": "Allows you to easily create fixtures on your symfony project.",
-    "type": "library",
+    "type": "symfony-bundle",
     "require": {
         "php": ">=8.1",
+        "symfony/framework-bundle": "^6.2",
         "doctrine/doctrine-bundle": "^2.10",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.15",
@@ -12,7 +13,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Aatis\\SymfonyFixtures\\": "src/"
+            "Aatis\\FixturesBundle\\": "src/"
         }
     },
     "authors": [

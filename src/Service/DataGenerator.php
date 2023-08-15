@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Service;
+namespace Aatis\FixturesBundle\Service;
 
-use App\Service\Faker;
-use App\Exception\MissingEntityRelationException;
-use App\Exception\NotSupportedTypeException;
+use Aatis\FixturesBundle\Service\Faker;
+use Aatis\FixturesBundle\Exception\MissingEntityRelationException;
+use Aatis\FixturesBundle\Exception\NotSupportedTypeException;
 
 class DataGenerator
 {
@@ -12,6 +12,9 @@ class DataGenerator
      * Generate fixtures base on the models given.
      * 
      * @return string[]
+     * 
+     * @throws NotSupportedTypeException
+     * @throws MissingEntityRelationException
      */
     public function generate(array $yaml): array
     {
@@ -36,7 +39,7 @@ class DataGenerator
                         }
                     } else {
                         $type = $fakerInfos['type'];
-                        $data[] = (isset($fakerInfos['attributes'])) ? Faker::$type(...$fakerInfos['attributes']) : Faker::$type();
+                        $data[] = (isset($fakerInfos['parameters'])) ? Faker::$type(...$fakerInfos['parameters']) : Faker::$type();
                     }
                 }
                 $yaml[$tableName]['data'][$i] = $data;

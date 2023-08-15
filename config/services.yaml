@@ -1,0 +1,9 @@
+services:
+  _defaults:
+    autowire: true  
+    autoconfigure: true
+
+  Aatis\FixturesBundle\:
+      resource: '../src/'
+
+  

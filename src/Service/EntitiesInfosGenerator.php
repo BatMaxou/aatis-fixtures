@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace Aatis\FixturesBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 

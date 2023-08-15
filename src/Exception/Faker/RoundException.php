@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exception\Faker;
+namespace Aatis\FixturesBundle\Exception\Faker;
 
 class RoundException extends \Exception
 {

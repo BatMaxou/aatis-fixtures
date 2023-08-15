@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Command;
+namespace Aatis\FixturesBundle\Command;
 
-use App\Service\DataGenerator;
+use Aatis\FixturesBundle\Service\DataGenerator;
 use Symfony\Component\Yaml\Yaml;
-use App\Exception\ConfigNotFoundException;
+use Aatis\FixturesBundle\Exception\ConfigNotFoundException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:fixtures:generate',
+    name: 'aatis:fixtures:generate',
 )]
 class GenerateFixturesCommand extends Command
 {

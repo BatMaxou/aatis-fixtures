@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exception;
+namespace Aatis\FixturesBundle\Exception;
 
 class EntityNotFoundException extends \Exception
 {
