@@ -34,7 +34,7 @@ class GenerateModelsCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $content = $this->generator->generate();
-        $path = './fixtures/config.yaml';
+        $path = './config/fixtures/config.yaml';
 
         $dirname = dirname($path);
         if (!is_dir($dirname)) {
@@ -44,7 +44,7 @@ class GenerateModelsCommand extends Command
         $file = fopen($path, 'w');
         fwrite($file, Yaml::dump($content));
 
-        $io->success('Succeded to create models into file ./fixtures/config.yaml');
+        $io->success('Succeded to create models into file ./config/fixtures/config.yaml');
 
         return Command::SUCCESS;
     }
