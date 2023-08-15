@@ -2,7 +2,6 @@
 
 namespace Aatis\FixturesBundle\Service;
 
-use Aatis\FixturesBundle\Service\EntitiesInfosGenerator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 class EntitiesDictionary
@@ -16,7 +15,7 @@ class EntitiesDictionary
 
     /**
      * Generate array infos which contains all the entities of the app witth there namespace and there repository, ordering by there creation priority.
-     * 
+     *
      * @return array[string]array
      */
     public function getInfos(): array
@@ -26,7 +25,7 @@ class EntitiesDictionary
 
     /**
      * Return an array where the keys are the name of the your entities in snake_case, and the value is the namespace of this entity ordering by there creation priority.
-     * 
+     *
      * @return string[]
      */
     public function getEntities(): array
@@ -42,7 +41,7 @@ class EntitiesDictionary
 
     /**
      * Return an array with the name of your entities in snake_case, ordering by there creation priority.
-     * 
+     *
      * @return string[]
      */
     public function getEntitiesNames(): array
@@ -52,9 +51,9 @@ class EntitiesDictionary
 
     /**
      * Return the properties of a given entity name (the name must be in snake_case).
-     * 
-     * @param string $entityName The name of the target entity in snake_case.
-     * 
+     *
+     * @param string $entityName the name of the target entity in snake_case
+     *
      * @return string[]|null
      */
     public function getProperties(string $entityName): ?array
@@ -69,8 +68,8 @@ class EntitiesDictionary
         $accurateProperties = [];
 
         foreach ($properties as $property) {
-            if ($property->getName() !== 'id') {
-                if ($property->getType()->getName() !== 'Doctrine\Common\Collections\Collection') {
+            if ('id' !== $property->getName()) {
+                if ('Doctrine\Common\Collections\Collection' !== $property->getType()->getName()) {
                     $accurateProperties[$property->getName()] = str_replace('Interface', '', $property->getType()->getName());
                 }
             }
@@ -81,7 +80,7 @@ class EntitiesDictionary
 
     /**
      * Return an array where the keys are the name of the your entities in snake_case and the value is the repository of this entity, ordering by there creation priority.
-     * 
+     *
      * @return ServiceEntityRepository[]
      */
     public function getRepositories(): array

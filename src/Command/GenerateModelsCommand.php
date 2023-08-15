@@ -38,7 +38,7 @@ class GenerateModelsCommand extends Command
 
         $dirname = dirname($path);
         if (!is_dir($dirname)) {
-            mkdir($dirname, 0777, true);
+            mkdir($dirname, 0o777, true);
         }
 
         $file = fopen($path, 'w');

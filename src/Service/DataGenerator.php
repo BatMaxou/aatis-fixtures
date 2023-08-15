@@ -2,7 +2,6 @@
 
 namespace Aatis\FixturesBundle\Service;
 
-use Aatis\FixturesBundle\Service\Faker;
 use Aatis\FixturesBundle\Exception\MissingEntityRelationException;
 use Aatis\FixturesBundle\Exception\NotSupportedTypeException;
 
@@ -10,9 +9,9 @@ class DataGenerator
 {
     /**
      * Generate fixtures base on the models given.
-     * 
+     *
      * @return string[]
-     * 
+     *
      * @throws NotSupportedTypeException
      * @throws MissingEntityRelationException
      */
@@ -22,16 +21,16 @@ class DataGenerator
             $tableModel = $tableInfos['model'];
             $iteration = $tableInfos['iteration'];
 
-            for ($i = 0; $i < $iteration; $i++) {
+            for ($i = 0; $i < $iteration; ++$i) {
                 $data = [];
                 foreach ($tableModel as $fakerInfos) {
                     if (isset($fakerInfos['class'])) {
-                        if ($fakerInfos['class'] === 'DateTime') {
-                            $data[] = strval((new $fakerInfos['class'])->format('Y-m-d H:i:s'));
+                        if ('DateTime' === $fakerInfos['class']) {
+                            $data[] = strval((new $fakerInfos['class']())->format('Y-m-d H:i:s'));
                         } else {
                             throw new NotSupportedTypeException(sprintf('Type "%s" is not supported.', $fakerInfos['class']));
                         }
-                    } else if (isset($fakerInfos['entity'])) {
+                    } elseif (isset($fakerInfos['entity'])) {
                         if ($yaml[$fakerInfos['entity']]['iteration'] > 0) {
                             $data[] = Faker::int(['min' => 1, 'max' => $yaml[$fakerInfos['entity']]['iteration']]);
                         } else {

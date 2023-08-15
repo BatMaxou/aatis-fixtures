@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class FakerListCommand extends Command
 {
     private array $infos;
+
     public function __construct()
     {
         parent::__construct();
@@ -25,15 +26,18 @@ class FakerListCommand extends Command
             $this->infos[] = [$method->getName(), $match[1]];
         }
     }
+
     protected function configure(): void
     {
         $this
             ->setDescription('List all the method of the faker');
     }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->table(['name', 'help'], $this->infos);
+
         return Command::SUCCESS;
     }
 }

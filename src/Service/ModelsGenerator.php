@@ -2,8 +2,6 @@
 
 namespace Aatis\FixturesBundle\Service;
 
-use Aatis\FixturesBundle\Service\EntitiesDictionary;
-
 class ModelsGenerator
 {
     private EntitiesDictionary $EntitiesDictionary;
@@ -15,7 +13,7 @@ class ModelsGenerator
 
     /**
      * Generate an array of arrays where each one represent one of your entities with the infos of each of there properties.
-     * 
+     *
      * @return array[string]array
      */
     public function generate(): array
@@ -29,7 +27,7 @@ class ModelsGenerator
             foreach ($this->EntitiesDictionary->getProperties($name) as $propertyName => $type) {
                 if (str_starts_with($type, 'App\\Entity\\')) {
                     $model[$propertyName] = ['entity' => lcfirst(str_replace('App\\Entity\\', '', $type))];
-                } else if (ctype_upper($type[0])) {
+                } elseif (ctype_upper($type[0])) {
                     $model[$propertyName] = ['class' => $type];
                 } else {
                     $model[$propertyName] = ['type' => $type];
@@ -39,7 +37,7 @@ class ModelsGenerator
             $content[$name] = [
                 'iteration' => 0,
                 'model' => $model,
-                'data' => []
+                'data' => [],
             ];
         }
 

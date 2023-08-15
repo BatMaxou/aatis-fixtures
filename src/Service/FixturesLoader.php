@@ -3,7 +3,6 @@
 namespace Aatis\FixturesBundle\Service;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Aatis\FixturesBundle\Service\EntitiesDictionary;
 use Aatis\FixturesBundle\Exception\ClassNotFoundExcepton;
 use Aatis\FixturesBundle\Exception\ClassNotFoundException;
 use Aatis\FixturesBundle\Exception\EntityNotFoundException;
@@ -13,16 +12,15 @@ class FixturesLoader
 {
     private array $repositories;
 
-    function __construct(EntitiesDictionary $EntitiesDictionary)
+    public function __construct(EntitiesDictionary $EntitiesDictionary)
     {
         $this->repositories = $EntitiesDictionary->getRepositories();
     }
 
     /**
-     * Parse and load fixtures of a YAML file into the database
-     * 
-     * @return bool
-     * 
+     * Parse and load fixtures of a YAML file into the database.
+     *
+     *
      * @throws ClassNotFoundException
      * @throws EntityNotFoundException
      * @throws MissingArgumentException
@@ -33,7 +31,7 @@ class FixturesLoader
         // pour chaque TABLE
         foreach ($yaml as $tableName => $tableInfos) {
             // si la table est demandée ou si toutes les tables sont demandées
-            if (count($tables) === 0 || in_array($tableName, $tables)) {
+            if (0 === count($tables) || in_array($tableName, $tables)) {
                 $compt = 0;
                 // récupération du MODEL de la table
                 $tableModel = $tableInfos['model'];
@@ -42,8 +40,10 @@ class FixturesLoader
                 foreach ($tableInfos['data'] as $data) {
                     // créer une nouvelle entité
                     $entityName = null;
-                    foreach (explode('_', $tableName) as $subName) $entityName .= ucfirst($subName);
-                    $entity = new (('App\\Entity\\') . $entityName)();
+                    foreach (explode('_', $tableName) as $subName) {
+                        $entityName .= ucfirst($subName);
+                    }
+                    $entity = new ('App\\Entity\\'.$entityName)();
 
                     // pour chaque COLONES
                     $indexColumn = 0;
@@ -52,7 +52,7 @@ class FixturesLoader
                             // gérer les datetime ou autres class basiques
                             // ou gérer les clés étrangères
                             if (isset($type['class'])) {
-                                if ($data[$indexColumn] === null) {
+                                if (null === $data[$indexColumn]) {
                                     $value = null;
                                 } else {
                                     try {
@@ -62,28 +62,28 @@ class FixturesLoader
                                     }
                                 }
                             } elseif (isset($type['entity'])) {
-                                if ($data[$indexColumn] === null) {
+                                if (null === $data[$indexColumn]) {
                                     $value = null;
                                 } else {
                                     $value = $this->repositories[$type['entity']]->find($data[$indexColumn]);
-                                    if ($value === null) {
+                                    if (null === $value) {
                                         throw new EntityNotFoundException(sprintf('Id "%d" does not match an existing %s.', $data['indexColumn'], $type['entity']));
                                     }
                                 }
                             } else {
                                 $value = $data[$indexColumn];
                             }
-                            $setter = 'set' . ucfirst($column);
+                            $setter = 'set'.ucfirst($column);
                             $entity->$setter($value);
-                            $indexColumn++;
+                            ++$indexColumn;
                         } else {
-                            throw new MissingArgumentException(sprintf("Missing argument n°%d in fixtures of table %s", $indexColumn + 1, $tableName));
+                            throw new MissingArgumentException(sprintf('Missing argument n°%d in fixtures of table %s', $indexColumn + 1, $tableName));
                         }
                     }
                     $this->repositories[$tableName]->save($entity, true);
-                    $compt++;
+                    ++$compt;
                 }
-                $io->info($compt . ' row(s) inserted into : ' . $tableName);
+                $io->info($compt.' row(s) inserted into : '.$tableName);
             }
         }
 

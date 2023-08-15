@@ -50,12 +50,13 @@ class EntitiesInfosGenerator
         }
 
         $sortedEntities[] = $metadata->getName();
+
         return;
     }
 
     /**
      * Generate array infos which contains all the entities of the app witth there namespace and there repository, ordering by there creation priority.
-     * 
+     *
      * @return array[string]array
      */
     public function generate(): array
@@ -67,7 +68,7 @@ class EntitiesInfosGenerator
             $name = '';
             foreach (str_split(lcfirst(explode('\\', $fullName)[2])) as $letter) {
                 if (ctype_upper($letter)) {
-                    $name .= '_' . strtolower($letter);
+                    $name .= '_'.strtolower($letter);
                 } else {
                     $name .= $letter;
                 }

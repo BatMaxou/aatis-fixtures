@@ -23,7 +23,7 @@ class LoadFixturesCommand extends Command
 {
     private FixturesLoader $loader;
 
-    function __construct(FixturesLoader $loader)
+    public function __construct(FixturesLoader $loader)
     {
         parent::__construct();
         $this->loader = $loader;
@@ -45,6 +45,7 @@ class LoadFixturesCommand extends Command
         if (!$input->getOption('force')) {
             $io->text('Please run the operation with --force to execute');
             $io->caution('All data will be lost!');
+
             return Command::INVALID;
         }
 
@@ -55,9 +56,13 @@ class LoadFixturesCommand extends Command
         $refreshInput->setOption('force', true);
 
         $refresh = $this->getApplication()->find('app:database:refresh');
-        if ($refresh->execute($input, $output) === 1) throw new ExecuteCommandException('Problem raise during the refresh of the database');
+        if (1 === $refresh->execute($input, $output)) {
+            throw new ExecuteCommandException('Problem raise during the refresh of the database');
+        }
 
-        if (!$yaml = Yaml::parseFile('./fixtures/config.yaml')) throw new ConfigNotFoundException('File "fixtures/config.yaml" doesn\'t exist');
+        if (!$yaml = Yaml::parseFile('./fixtures/config.yaml')) {
+            throw new ConfigNotFoundException('File "fixtures/config.yaml" doesn\'t exist');
+        }
 
         $tables = [];
         if (isset($input->getArguments()['table'])) {

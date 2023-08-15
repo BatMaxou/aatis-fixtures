@@ -46,10 +46,11 @@ class DatabaseRefreshCommand extends Command
         if (!$input->getOption('force')) {
             $io->text('Please run the operation with --force to execute');
             $io->caution('All data will be lost!');
+
             return Command::INVALID;
         }
         // if any table are given
-        if (count($input->getArgument('table')) === 0) {
+        if (0 === count($input->getArgument('table'))) {
             $drop = $this->getApplication()->find('doctrine:database:drop');
             $create = $this->getApplication()->find('doctrine:database:create');
             $schema = $this->getApplication()->find('doctrine:schema:update');
@@ -60,12 +61,13 @@ class DatabaseRefreshCommand extends Command
                 $io->listing([
                     'doctrine:database:drop',
                     'doctrine:database:create',
-                    'doctrine:schema:update'
+                    'doctrine:schema:update',
                 ]);
+
                 return Command::FAILURE;
             }
 
-            if ($drop->run($input, $output) !== 0) {
+            if (0 !== $drop->run($input, $output)) {
                 $io->warning('Ignoring the drop database step');
             } else {
                 $io->success('Succeded to drop database');
@@ -73,10 +75,14 @@ class DatabaseRefreshCommand extends Command
 
             $inputCreate = new ArrayInput([]);
 
-            if ($create->run($inputCreate, $output) !== 0) throw new ExecuteCommandException('Failure when executing the command : doctrine:database:create');
+            if (0 !== $create->run($inputCreate, $output)) {
+                throw new ExecuteCommandException('Failure when executing the command : doctrine:database:create');
+            }
             $io->success('Succeded to create database');
 
-            if ($schema->run($input, $output) !== 0) throw new ExecuteCommandException('Failure when executing the command : doctrine:schema:update');
+            if (0 !== $schema->run($input, $output)) {
+                throw new ExecuteCommandException('Failure when executing the command : doctrine:schema:update');
+            }
             $io->success('Succeded to update the database schema');
         } else {
             $tables = $input->getArgument('table');
@@ -92,17 +98,16 @@ class DatabaseRefreshCommand extends Command
 
     /**
      * Truncate the table given.
-     * 
-     * @return void
-     * 
+     *
+     *
      * @throws TruncateException
      * @throws TableNotFoundException
      */
     private function truncateTable(string $table): void
     {
         if (in_array($table, $this->tableList)) {
-            $delete = $this->connection->prepare('DELETE FROM ' . $table);
-            $resetIncrement = $this->connection->prepare('ALTER TABLE ' . $table . ' AUTO_INCREMENT=0');
+            $delete = $this->connection->prepare('DELETE FROM '.$table);
+            $resetIncrement = $this->connection->prepare('ALTER TABLE '.$table.' AUTO_INCREMENT=0');
             try {
                 $delete->executeQuery();
                 $resetIncrement->executeQuery();

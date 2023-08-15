@@ -32,10 +32,11 @@ class GenerateFixturesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-
         $io = new SymfonyStyle($input, $output);
 
-        if (!$yaml = Yaml::parseFile('./fixtures/config.yaml')) throw new ConfigNotFoundException('File "fixtures/config.yaml" doesn\'t exist');
+        if (!$yaml = Yaml::parseFile('./fixtures/config.yaml')) {
+            throw new ConfigNotFoundException('File "fixtures/config.yaml" doesn\'t exist');
+        }
 
         $content = $this->generator->generate($yaml);
 
@@ -43,7 +44,7 @@ class GenerateFixturesCommand extends Command
         $dirname = dirname($path);
 
         if (!is_dir($dirname)) {
-            mkdir($dirname, 0777, true);
+            mkdir($dirname, 0o777, true);
         }
 
         $file = fopen($path, 'w');
