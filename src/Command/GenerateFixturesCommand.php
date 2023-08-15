@@ -34,13 +34,13 @@ class GenerateFixturesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        if (!$yaml = Yaml::parseFile('./fixtures/config.yaml')) {
-            throw new ConfigNotFoundException('File "fixtures/config.yaml" doesn\'t exist');
+        if (!$yaml = Yaml::parseFile('./config/fixtures/config.yaml')) {
+            throw new ConfigNotFoundException('File "./config/fixtures/config.yaml" doesn\'t exist');
         }
 
         $content = $this->generator->generate($yaml);
 
-        $path = './fixtures/config.yaml';
+        $path = './config/fixtures/config.yaml';
         $dirname = dirname($path);
 
         if (!is_dir($dirname)) {
@@ -50,7 +50,7 @@ class GenerateFixturesCommand extends Command
         $file = fopen($path, 'w');
         fwrite($file, Yaml::dump($content));
 
-        $io->success('Succeded to create data for currents models into file ./fixtures/config.yaml');
+        $io->success('Succeded to create data for currents models into file ./config/fixtures/config.yaml');
 
         return Command::SUCCESS;
     }
