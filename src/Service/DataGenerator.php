@@ -39,7 +39,7 @@ class DataGenerator
                         }
                     } else {
                         $type = $fakerInfos['type'];
-                        $data[] = (isset($fakerInfos['attributes'])) ? Faker::$type(...$fakerInfos['attributes']) : Faker::$type();
+                        $data[] = (isset($fakerInfos['parameters'])) ? Faker::$type(...$fakerInfos['parameters']) : Faker::$type();
                     }
                 }
                 $yaml[$tableName]['data'][$i] = $data;
