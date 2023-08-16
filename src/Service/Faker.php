@@ -8,12 +8,48 @@ use Aatis\FixturesBundle\Exception\Faker\RoundException;
 class Faker
 {
     /**
+     * Generate a string of base on a patern. You can give faker methods between :: (:method:) and precise there parameters into.
+     * 
+     * @param string $patern patern of the returned string wanted
+     * @param string $parameters array including the parameters of the methods given into the patern
+     * @param bool $isAssociative inform if you want to use an associative array for var $parameters (['method' => [parameters]])
+     * 
+     * @return string
+     */
+    public static function patern(string $patern, array $parameters = [], bool $isAssociative = false): string
+    {
+        preg_match_all('/:([a-zA-Z0-9]*):/', $patern, $matches);
+
+        for ($i = 0; $i < count($matches[0]); ++$i) {
+            $method = $matches[1][$i];
+            $isSet = false;
+            if (!empty($parameters)) {
+                if ($isAssociative && in_array($method, array_keys($parameters))) {
+                    $patern = str_replace($matches[0][$i], call_user_func('self::' . $method, ...$parameters[$method]), $patern);
+                    $isSet = true;
+                } elseif (!$isAssociative && isset($parameters[$i])) {
+                    $patern = str_replace($matches[0][$i], call_user_func('self::' . $method, ...$parameters[$method]), $patern);
+                    $isSet = true;
+                }
+            }
+
+            if (!$isSet) {
+                $patern = str_replace($matches[0][$i], call_user_func('self::' . $method), $patern);
+            }
+        }
+
+        return $patern;
+    }
+
+    /**
      * Generate a string of a patern repeated n times separate by the given separator.
      *
      * @param string $functionName the name of the patern you want to be repeated
      * @param string $separator a string that will be place between each patern
      * @param int $nbPaternWanted the number of time you want the patern to be repeated
      * @param array $parameters inform the necessary parameters to execute fonctionName
+     * 
+     * @return string
      *
      * @throws IntRangeException
      */
@@ -25,7 +61,7 @@ class Faker
 
         $string = '';
         for ($i = 1; $i <= $nbPaternWanted; ++$i) {
-            $string .= strval(call_user_func('self::'.$functionName, ...$parameters));
+            $string .= strval(call_user_func('self::' . $functionName, ...$parameters));
 
             if ($i !== $nbPaternWanted) {
                 $string .= $separator;
@@ -152,7 +188,7 @@ class Faker
 
         $string = strval(self::int(['min' => $min, 'max' => $max]));
         while (strlen($string) < $lenght) {
-            $string = '0'.$string;
+            $string = '0' . $string;
         }
 
         return $string;
@@ -263,10 +299,10 @@ class Faker
     public static function company(): string
     {
         $body = self::bool() ? self::chooseValueFrom(['lastName', 'int']) : null;
-        $body = isset($body) ? ' '.self::$body().' ' : self::chooseValueFrom(['&', ' and ', ' ']);
+        $body = isset($body) ? ' ' . self::$body() . ' ' : self::chooseValueFrom(['&', ' and ', ' ']);
         $extension = (self::oneOn(10)) ? '™' : '';
 
-        return self::chooseValueFrom(FakerProvider::COMPANY_PREFIXES).$body.self::chooseValueFrom(FakerProvider::COMPANY_SUFFIXES).$extension;
+        return self::chooseValueFrom(FakerProvider::COMPANY_PREFIXES) . $body . self::chooseValueFrom(FakerProvider::COMPANY_SUFFIXES) . $extension;
     }
 
     /**
@@ -305,9 +341,9 @@ class Faker
         for ($i = 2; $i <= $nbWords; ++$i) {
             if ($reset) {
                 $reset = false;
-                $text .= ' '.ucfirst(self::word());
+                $text .= ' ' . ucfirst(self::word());
             } else {
-                $text .= ' '.self::word();
+                $text .= ' ' . self::word();
             }
 
             if ($i === $nbWords) {
