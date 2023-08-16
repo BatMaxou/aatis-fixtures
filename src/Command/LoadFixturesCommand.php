@@ -55,13 +55,13 @@ class LoadFixturesCommand extends Command
         $refreshInput = new ArrayInput([], $def);
         $refreshInput->setOption('force', true);
 
-        $refresh = $this->getApplication()->find('app:database:refresh');
+        $refresh = $this->getApplication()->find('aatis:database:refresh');
         if (1 === $refresh->execute($input, $output)) {
             throw new ExecuteCommandException('Problem raise during the refresh of the database');
         }
 
-        if (!$yaml = Yaml::parseFile('./fixtures/config.yaml')) {
-            throw new ConfigNotFoundException('File "fixtures/config.yaml" doesn\'t exist');
+        if (!$yaml = Yaml::parseFile('./config/fixtures/config.yaml')) {
+            throw new ConfigNotFoundException('File "./config/fixtures/config.yaml" doesn\'t exist');
         }
 
         $tables = [];
