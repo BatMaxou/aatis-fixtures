@@ -2,7 +2,7 @@
 
 namespace Aatis\FixturesBundle\Service;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ObjectRepository;
 
 class EntitiesDictionary
 {
@@ -40,6 +40,16 @@ class EntitiesDictionary
     }
 
     /**
+     * Return the ::class of the given entity name in snake_case.
+     * 
+     * @return class-string<object>
+     */
+    public function getEntity(string $className): string
+    {
+        return $this->infos[$className]['class'];
+    }
+
+    /**
      * Return an array with the name of your entities in snake_case, ordering by there creation priority.
      *
      * @return string[]
@@ -54,12 +64,12 @@ class EntitiesDictionary
      *
      * @param string $entityName the name of the target entity in snake_case
      *
-     * @return string[]|null
+     * @return string[]
      */
-    public function getProperties(string $entityName): ?array
+    public function getProperties(string $entityName): array
     {
         if (!array_key_exists($entityName, $this->infos)) {
-            return null;
+            return [];
         }
 
         $reflection = new \ReflectionClass($this->infos[$entityName]['class']);
@@ -81,7 +91,7 @@ class EntitiesDictionary
     /**
      * Return an array where the keys are the name of the your entities in snake_case and the value is the repository of this entity, ordering by there creation priority.
      *
-     * @return ServiceEntityRepository[]
+     * @return array<string, ObjectRepository>
      */
     public function getRepositories(): array
     {

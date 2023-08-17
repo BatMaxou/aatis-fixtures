@@ -3,18 +3,17 @@
 namespace Aatis\FixturesBundle\Service;
 
 use Aatis\FixturesBundle\Exception\Faker\IntRangeException;
+use Aatis\FixturesBundle\Exception\Faker\ParameterException;
 use Aatis\FixturesBundle\Exception\Faker\RoundException;
 
 class Faker
 {
     /**
-     * Generate a string of base on a patern. You can give faker methods between :: (:method:) and precise there parameters into.
-     * 
+     * Generate a string base on a patern. You can give faker methods between :: (:method:) and precise there parameters into.
+     *
      * @param string $patern patern of the returned string wanted
-     * @param string $parameters array including the parameters of the methods given into the patern
+     * @param array<string|int, array<array<string|int, string|int>|string|int>> $parameters array including the parameters of the methods given into the patern
      * @param bool $isAssociative inform if you want to use an associative array for var $parameters (['method' => [parameters]])
-     * 
-     * @return string
      */
     public static function patern(string $patern, array $parameters = [], bool $isAssociative = false): string
     {
@@ -23,19 +22,32 @@ class Faker
         for ($i = 0; $i < count($matches[0]); ++$i) {
             $method = $matches[1][$i];
             $isSet = false;
+
             if (!empty($parameters)) {
+                $key = null;
+
                 if ($isAssociative && in_array($method, array_keys($parameters))) {
-                    $patern = str_replace($matches[0][$i], call_user_func('self::' . $method, ...$parameters[$method]), $patern);
-                    $isSet = true;
+                    $key = $method;
                 } elseif (!$isAssociative && isset($parameters[$i])) {
-                    $patern = str_replace($matches[0][$i], call_user_func('self::' . $method, ...$parameters[$method]), $patern);
-                    $isSet = true;
+                    $key = $i;
+                } else {
+                    throw new ParameterException(sprintf("Method %s dosn\'t have any parameters define, this method may not exist or maybe you forgot to precise parameters for this method.", $method));
                 }
+
+                /**
+                 * @var string|int
+                 */
+                $result = call_user_func('self::' . $method, ...$parameters[$key]);
+                $isSet = true;
             }
 
             if (!$isSet) {
-                $patern = str_replace($matches[0][$i], call_user_func('self::' . $method), $patern);
+                /**
+                 * @var string|int
+                 */
+                $result = call_user_func('self::' . $method);
             }
+            $patern = str_replace($matches[0][$i], (string) $result, $patern);
         }
 
         return $patern;
@@ -48,8 +60,6 @@ class Faker
      * @param string $separator a string that will be place between each patern
      * @param int $nbPaternWanted the number of time you want the patern to be repeated
      * @param array $parameters inform the necessary parameters to execute fonctionName
-     * 
-     * @return string
      *
      * @throws IntRangeException
      */

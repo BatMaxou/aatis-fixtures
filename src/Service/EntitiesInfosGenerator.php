@@ -10,12 +10,12 @@ class EntitiesInfosGenerator
     // permettre d'exclure des entity qu'on ne veut pas en BDD
     // voir annotation de classe
     // et/ou permettre dans services.yaml
-    private array $exclude;
+    // private array $exclude;
 
-    public function __construct(EntityManagerInterface $em, array $exclude = [])
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
-        $this->exclude = $exclude;
+        // $this->exclude = $exclude;
     }
 
     private function generateOrderedTableByPriority($allMetadata): array
@@ -55,7 +55,7 @@ class EntitiesInfosGenerator
     }
 
     /**
-     * Generate array infos which contains all the entities of the app witth there namespace and there repository, ordering by there creation priority.
+     * Generate array infos which contains all the entities of the app with there namespace, ordering by there creation priority.
      *
      * @return array[string]array
      */
@@ -68,13 +68,13 @@ class EntitiesInfosGenerator
             $name = '';
             foreach (str_split(lcfirst(explode('\\', $fullName)[2])) as $letter) {
                 if (ctype_upper($letter)) {
-                    $name .= '_'.strtolower($letter);
+                    $name .= '_' . strtolower($letter);
                 } else {
                     $name .= $letter;
                 }
             }
 
-            $infos[strtolower($name)] = ['class' => $fullName, 'repository' => $this->em->getRepository($fullName)];
+            $infos[strtolower($name)] = ['class' => $fullName];
         }
 
         return $infos;
