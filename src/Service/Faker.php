@@ -3,7 +3,6 @@
 namespace Aatis\FixturesBundle\Service;
 
 use Aatis\FixturesBundle\Exception\Faker\IntRangeException;
-use Aatis\FixturesBundle\Exception\Faker\ParameterException;
 use Aatis\FixturesBundle\Exception\Faker\RoundException;
 
 class Faker
@@ -21,27 +20,32 @@ class Faker
 
         for ($i = 0; $i < count($matches[0]); ++$i) {
             $method = $matches[1][$i];
-            $string = '';
+            /**
+             * @var callable $callable
+             */
+            $callable = self::class.'::'.$method;
+            $result = '';
             $isSet = false;
 
             if (!empty($parameters)) {
-                $key = null;
-                if ($isAssociative && in_array($method, array_keys($parameters))) {
-                    $key = $method;
-                } elseif (!$isAssociative && isset($parameters[$i])) {
-                    $key = $i;
+                if ($isAssociative) {
+                    if (in_array($method, array_keys($parameters))) {
+                        $result = call_user_func($callable, $parameters[$method]);
+                        $isSet = true;
+                    }
                 } else {
-                    throw new ParameterException(sprintf("Method %s dosn\'t have any parameters define, this method may not exist or maybe you forgot to precise parameters for this method.", $method));
+                    if (isset($parameters[$i])) {
+                        $result = call_user_func($callable, ...$parameters[$i]);
+                        $isSet = true;
+                    }
                 }
-
-                $result = call_user_func(self::class . '::' . $method, $parameters[$key]);
-                $isSet = true;
             }
 
             if (!$isSet) {
-                $result = call_user_func(self::class . '::' . $method);
+                $result = call_user_func($callable);
             }
 
+            $string = '';
             $string = self::addElementToString($string, $result);
             $patern = str_replace($matches[0][$i], $string, $patern);
         }
@@ -55,7 +59,7 @@ class Faker
      * @param string $functionName the name of the patern you want to be repeated
      * @param string $separator a string that will be place between each patern
      * @param int $nbPaternWanted the number of time you want the patern to be repeated
-     * @param array $parameters inform the necessary parameters to execute fonctionName
+     * @param array<string|int, array<array<string|int, string|int>|string|int>> $parameters inform the necessary parameters to execute fonctionName
      *
      * @throws IntRangeException
      */
@@ -67,7 +71,11 @@ class Faker
 
         $string = '';
         for ($i = 1; $i <= $nbPaternWanted; ++$i) {
-            $paternElement = call_user_func(self::class . '::' . $functionName, ...$parameters);
+            /**
+             * @var callable $callable
+             */
+            $callable = self::class.'::'.$functionName;
+            $paternElement = call_user_func($callable, ...$parameters);
 
             $string = self::addElementToString($string, $paternElement);
 
@@ -229,7 +237,7 @@ class Faker
 
         $string = strval(self::int(['min' => $min, 'max' => $max]));
         while (strlen($string) < $length) {
-            $string = '0' . $string;
+            $string = '0'.$string;
         }
 
         return $string;
@@ -334,12 +342,16 @@ class Faker
     /**
      * Return a random last name.
      */
-    public static function lastName(): string
+    public static function lastName(bool $toUpper = false): string
     {
         /**
          * @var string $lastName
          */
         $lastName = self::chooseValueFrom(FakerProvider::LAST_NAMES);
+
+        if (!$toUpper) {
+            return ucfirst(strtolower($lastName));
+        }
 
         return $lastName;
     }
@@ -350,10 +362,10 @@ class Faker
     public static function company(): string
     {
         $body = self::bool() ? self::chooseValueFrom(['lastName', 'int']) : null;
-        $body = isset($body) ? ' ' . self::$body() . ' ' : self::chooseValueFrom(['&', ' and ', ' ']);
+        $body = isset($body) ? ' '.self::$body().' ' : self::chooseValueFrom(['&', ' and ', ' ']);
         $extension = (self::oneOn(10)) ? '™' : '';
 
-        return self::chooseValueFrom(FakerProvider::COMPANY_PREFIXES) . $body . self::chooseValueFrom(FakerProvider::COMPANY_SUFFIXES) . $extension;
+        return self::chooseValueFrom(FakerProvider::COMPANY_PREFIXES).$body.self::chooseValueFrom(FakerProvider::COMPANY_SUFFIXES).$extension;
     }
 
     /**
@@ -397,9 +409,9 @@ class Faker
         for ($i = 2; $i <= $nbWords; ++$i) {
             if ($reset) {
                 $reset = false;
-                $text .= ' ' . ucfirst(self::word());
+                $text .= ' '.ucfirst(self::word());
             } else {
-                $text .= ' ' . self::word();
+                $text .= ' '.self::word();
             }
 
             if ($i === $nbWords) {

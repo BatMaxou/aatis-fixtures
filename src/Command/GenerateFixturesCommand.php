@@ -2,14 +2,15 @@
 
 namespace Aatis\FixturesBundle\Command;
 
-use Aatis\FixturesBundle\Service\DataGenerator;
 use Symfony\Component\Yaml\Yaml;
-use Aatis\FixturesBundle\Exception\ConfigNotFoundException;
 use Symfony\Component\Console\Command\Command;
+use Aatis\FixturesBundle\Service\DataGenerator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Aatis\FixturesBundle\Exception\FileRightsException;
+use Aatis\FixturesBundle\Exception\ConfigNotFoundException;
 
 #[AsCommand(
     name: 'aatis:fixtures:generate',
@@ -38,9 +39,20 @@ class GenerateFixturesCommand extends Command
             throw new ConfigNotFoundException('File "./config/fixtures/config.yaml" doesn\'t exist');
         }
 
-        if (!$yaml = Yaml::parseFile('./config/fixtures/config.yaml')) {
-            throw new ConfigNotFoundException('Config in "./config/fixtures/config.yaml" not found, maybe your fil is empty');
-        }
+        /**
+         * @var array<string, array{
+         *      iteration: 0,
+         *      model: array<array{
+         *          class: string
+         *      }|array{
+         *          entity: string
+         *      }|array{
+         *          type: string
+         *      }>,
+         *      data: array{}|array<int, array<int, int|string>>
+         * }> $yaml
+         */
+        $yaml = Yaml::parseFile('./config/fixtures/config.yaml') ?? throw new ConfigNotFoundException('Config in "./config/fixtures/config.yaml" not found, maybe your file is empty');
 
         $content = $this->generator->generate($yaml);
 
@@ -51,8 +63,11 @@ class GenerateFixturesCommand extends Command
             mkdir($dirname, 0o777, true);
         }
 
-        $file = fopen($path, 'w');
-        fwrite($file, Yaml::dump($content));
+        if ($file = fopen($path, 'w')) {
+            fwrite($file, Yaml::dump($content));
+        } else {
+            throw new FileRightsException('Can not access to the content of ./config/fixtures/config.yaml file');
+        }
 
         $io->success('Succeded to create data for currents models into file ./config/fixtures/config.yaml');
 

@@ -4,6 +4,9 @@ namespace Aatis\FixturesBundle\Service;
 
 class EntitiesDictionary
 {
+    /**
+     * @var array<string, class-string<object>>
+     */
     private array $infos;
 
     public function __construct(EntitiesInfosGenerator $generator)
@@ -14,7 +17,7 @@ class EntitiesDictionary
     /**
      * Generate array infos which contains all the entities of the app witth there namespace and there repository, ordering by there creation priority.
      *
-     * @return array[string]array
+     * @return array<string, class-string<object>>
      */
     public function getInfos(): array
     {
@@ -49,8 +52,6 @@ class EntitiesDictionary
 
     /**
      * Return the snake_case of the given class name.
-     *
-     * @param class-string<object>
      */
     public function getSnakeCase(string $class): string
     {
@@ -82,12 +83,16 @@ class EntitiesDictionary
 
         $reflection = new \ReflectionClass($this->infos[$entityName]);
         $properties = $reflection->getProperties();
-
         $accurateProperties = [];
         foreach ($properties as $property) {
-            if ('id' !== $property->getName()) {
-                if ('Doctrine\Common\Collections\Collection' !== $property->getType()->getName()) {
-                    $accurateProperties[$property->getName()] = str_replace('Interface', '', $property->getType()->getName());
+            $propertyName = $property->getName();
+            if ('id' !== $propertyName) {
+                /**
+                 * @var \ReflectionNamedType $propertyType
+                 */
+                $propertyType = $property->getType();
+                if ('Doctrine\Common\Collections\Collection' !== $propertyType->getName()) {
+                    $accurateProperties[$propertyName] = str_replace('Interface', '', $propertyType->getName());
                 }
             }
         }
