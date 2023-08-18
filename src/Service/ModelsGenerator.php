@@ -4,11 +4,11 @@ namespace Aatis\FixturesBundle\Service;
 
 class ModelsGenerator
 {
-    private EntitiesDictionary $EntitiesDictionary;
+    private EntitiesDictionary $entitiesDictionary;
 
-    public function __construct(EntitiesDictionary $EntitiesDictionary)
+    public function __construct(EntitiesDictionary $entitiesDictionary)
     {
-        $this->EntitiesDictionary = $EntitiesDictionary;
+        $this->entitiesDictionary = $entitiesDictionary;
     }
 
     /**
@@ -29,14 +29,14 @@ class ModelsGenerator
     public function generate(): array
     {
         $content = [];
-        $entitiesNames = $this->EntitiesDictionary->getEntitiesNames();
+        $entitiesNames = $this->entitiesDictionary->getEntitiesNames();
 
         foreach ($entitiesNames as $name) {
             $model = [];
 
-            foreach ($this->EntitiesDictionary->getProperties($name) as $propertyName => $type) {
-                if (str_starts_with($type, 'App\\Entity\\')) {
-                    $model[$propertyName] = ['entity' => lcfirst(str_replace('App\\Entity\\', '', $type))];
+            foreach ($this->entitiesDictionary->getProperties($name) as $propertyName => $type) {
+                if (preg_match('/^(([a-zA-Z0-9]|\\\)*)\\\Entity\\\(([a-zA-Z0-9]|\\\)*)$/', $type, $matches)) {
+                    $model[$propertyName] = ['entity' => $this->entitiesDictionary->getSnakeCase($type)];
                 } elseif (ctype_upper($type[0])) {
                     $model[$propertyName] = ['class' => $type];
                 } else {

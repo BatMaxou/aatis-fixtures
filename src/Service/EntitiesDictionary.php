@@ -2,8 +2,6 @@
 
 namespace Aatis\FixturesBundle\Service;
 
-use Doctrine\Persistence\ObjectRepository;
-
 class EntitiesDictionary
 {
     private array $infos;
@@ -33,7 +31,7 @@ class EntitiesDictionary
         $entities = [];
 
         foreach ($this->infos as $key => $value) {
-            $entities[$key] = ['class' => $value['class']];
+            $entities[$key] = $value;
         }
 
         return $entities;
@@ -41,12 +39,22 @@ class EntitiesDictionary
 
     /**
      * Return the ::class of the given entity name in snake_case.
-     * 
+     *
      * @return class-string<object>
      */
     public function getEntity(string $className): string
     {
-        return $this->infos[$className]['class'];
+        return $this->infos[$className];
+    }
+
+    /**
+     * Return the snake_case of the given class name.
+     *
+     * @param class-string<object>
+     */
+    public function getSnakeCase(string $class): string
+    {
+        return array_flip($this->infos)[$class];
     }
 
     /**
@@ -72,11 +80,10 @@ class EntitiesDictionary
             return [];
         }
 
-        $reflection = new \ReflectionClass($this->infos[$entityName]['class']);
+        $reflection = new \ReflectionClass($this->infos[$entityName]);
         $properties = $reflection->getProperties();
 
         $accurateProperties = [];
-
         foreach ($properties as $property) {
             if ('id' !== $property->getName()) {
                 if ('Doctrine\Common\Collections\Collection' !== $property->getType()->getName()) {
@@ -86,21 +93,5 @@ class EntitiesDictionary
         }
 
         return $accurateProperties;
-    }
-
-    /**
-     * Return an array where the keys are the name of the your entities in snake_case and the value is the repository of this entity, ordering by there creation priority.
-     *
-     * @return array<string, ObjectRepository>
-     */
-    public function getRepositories(): array
-    {
-        $repositories = [];
-
-        foreach ($this->infos as $key => $value) {
-            $repositories[$key] = $value['repository'];
-        }
-
-        return $repositories;
     }
 }

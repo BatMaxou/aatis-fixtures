@@ -21,11 +21,11 @@ class Faker
 
         for ($i = 0; $i < count($matches[0]); ++$i) {
             $method = $matches[1][$i];
+            $string = '';
             $isSet = false;
 
             if (!empty($parameters)) {
                 $key = null;
-
                 if ($isAssociative && in_array($method, array_keys($parameters))) {
                     $key = $method;
                 } elseif (!$isAssociative && isset($parameters[$i])) {
@@ -34,20 +34,16 @@ class Faker
                     throw new ParameterException(sprintf("Method %s dosn\'t have any parameters define, this method may not exist or maybe you forgot to precise parameters for this method.", $method));
                 }
 
-                /**
-                 * @var string|int
-                 */
-                $result = call_user_func('self::' . $method, ...$parameters[$key]);
+                $result = call_user_func(self::class . '::' . $method, $parameters[$key]);
                 $isSet = true;
             }
 
             if (!$isSet) {
-                /**
-                 * @var string|int
-                 */
-                $result = call_user_func('self::' . $method);
+                $result = call_user_func(self::class . '::' . $method);
             }
-            $patern = str_replace($matches[0][$i], (string) $result, $patern);
+
+            $string = self::addElementToString($string, $result);
+            $patern = str_replace($matches[0][$i], $string, $patern);
         }
 
         return $patern;
@@ -71,7 +67,9 @@ class Faker
 
         $string = '';
         for ($i = 1; $i <= $nbPaternWanted; ++$i) {
-            $string .= strval(call_user_func('self::' . $functionName, ...$parameters));
+            $paternElement = call_user_func(self::class . '::' . $functionName, ...$parameters);
+
+            $string = self::addElementToString($string, $paternElement);
 
             if ($i !== $nbPaternWanted) {
                 $string .= $separator;
@@ -81,19 +79,41 @@ class Faker
         return $string;
     }
 
+    private static function addElementToString(string &$string, mixed $element): string
+    {
+        if (is_string($element)) {
+            $string .= $element;
+        } elseif (is_int($element) || is_float($element)) {
+            $string .= (string) $element;
+        } elseif (is_array($element)) {
+            for ($i = 0; $i < count($element); ++$i) {
+                if (0 !== $i) {
+                    $string .= ', ';
+                }
+
+                self::addElementToString($string, $element[$i]);
+            }
+        } else {
+            $string .= ":this patern don\'t return string|int|array<in|string):";
+        }
+
+        return $string;
+    }
+
     /**
      * Generate a random number.
      *
-     * @param array $options you can precise the range wanted with a maximum and a minimum (default [0:1000])
-     *
-     * @return int
+     * @param array{
+     *      min?: int,
+     *      max?: int
+     * } $options you can precise the range wanted with a maximum and a minimum (default [0:1000])
      *
      * @throws IntRangeException
      */
     public static function int(array $options = [
         'min' => 0,
         'max' => 1000,
-    ]): ?int
+    ]): int
     {
         $min = $options['min'] ?? 0;
         $max = $options['max'] ?? 1000;
@@ -112,7 +132,11 @@ class Faker
     /**
      * Generate a random float.
      *
-     * @param array $options you can precise the range wanted with a maximum and a minimum and a round for the number of digit wanted after the point (default [0:1000] round by 2)
+     * @param array{
+     *      min?: int,
+     *      max?: int,
+     *      round?: int
+     * } $options you can precise the range wanted with a maximum and a minimum and a round for the number of digit wanted after the point (default [0:1000] round by 2)
      *
      * @throws RoundException
      * @throws IntRangeException
@@ -137,7 +161,10 @@ class Faker
     /**
      * Generate a random hexadecimal number.
      *
-     * @param array $options you can precise the range wanted with a maximum and a minimum (default [0:65535])
+     * @param array{
+     *      min?: int,
+     *      max?: int
+     * } $options you can precise the range wanted with a maximum and a minimum (default [0:65535])
      */
     public static function hexa(array $options = [
         'min' => 0,
@@ -166,17 +193,21 @@ class Faker
     /**
      * Return a random string of n characters base on the alphabet.
      *
-     * @param int $lenght you can precise the lenght of the string (default 5)
+     * @param int $length you can precise the length of the string (default 5)
      */
-    public static function string(int $lenght = 5): string
+    public static function string(int $length = 5): string
     {
-        return self::repeatPatern('chooseValueFrom', '', $lenght, [FakerProvider::ALPHABET]);
+        return self::repeatPatern('chooseValueFrom', '', $length, [FakerProvider::ALPHABET]);
     }
 
     /**
      * Generate a random number into a string.
      *
-     * @param array $options you can precise the range wanted with a maximum and a minimum (default [0:1000]) and the number of digit that you want (default 4)
+     * @param array{
+     *      min?: int,
+     *      max?: int,
+     *      length?: int
+     * } $options you can precise the range wanted with a maximum and a minimum (default [0:1000]) and the number of digit that you want (default 4)
      *
      * @return string
      *
@@ -185,19 +216,19 @@ class Faker
     public static function stringInt(array $options = [
         'min' => 0,
         'max' => 1000,
-        'lenght' => 4,
+        'length' => 4,
     ])
     {
         $min = $options['min'] ?? 0;
         $max = $options['max'] ?? 1000;
-        $lenght = $options['lenght'] ?? 4;
+        $length = $options['length'] ?? 4;
 
-        if (strlen(strval($max)) > $lenght) {
-            throw new IntRangeException('The maximum can not have more digit than the given lenght.');
+        if (strlen(strval($max)) > $length) {
+            throw new IntRangeException('The maximum can not have more digit than the given length.');
         }
 
         $string = strval(self::int(['min' => $min, 'max' => $max]));
-        while (strlen($string) < $lenght) {
+        while (strlen($string) < $length) {
             $string = '0' . $string;
         }
 
@@ -207,7 +238,7 @@ class Faker
     /**
      * Choose a random value from a given array.
      *
-     * @param array $array the array where you want to choose the value
+     * @param mixed[] $array the array where you want to choose the value
      * @param int $nbElementsWanted you can precise the number of value that you want (default 1)
      *
      * @return mixed if you want severals values this method return an array, otherwise it return a value
@@ -236,7 +267,7 @@ class Faker
     /**
      * Choose a random key from a given array.
      *
-     * @param array $array the array where you want to choose the key
+     * @param mixed[] $array the array where you want to choose the key
      * @param int $nbElementsWanted you can precise the number of key that you want (default 1)
      *
      * @return mixed if you want severals keys this method return an array, otherwise it return a key
@@ -262,10 +293,10 @@ class Faker
     /**
      * Choose a random element (key => value) from a given array.
      *
-     * @param array $array the array where you want to choose the element
+     * @param mixed[] $array the array where you want to choose the element
      * @param int $nbElementsWanted you can precise the number of element that you want (default 1)
      *
-     * @return mixed if you want severals elements this method return an array, otherwise it return an element
+     * @return array<int|string, mixed> if you want severals elements this method return an array, otherwise it return an element
      */
     public static function chooseBothFrom(array $array, $nbElementsWanted = 1): ?array
     {
@@ -292,7 +323,12 @@ class Faker
      */
     public static function firstName(): string
     {
-        return self::chooseValueFrom(FakerProvider::FIRST_NAMES);
+        /**
+         * @var string $firstName
+         */
+        $firstName = self::chooseValueFrom(FakerProvider::FIRST_NAMES);
+
+        return $firstName;
     }
 
     /**
@@ -300,7 +336,12 @@ class Faker
      */
     public static function lastName(): string
     {
-        return self::chooseValueFrom(FakerProvider::LAST_NAMES);
+        /**
+         * @var string $lastName
+         */
+        $lastName = self::chooseValueFrom(FakerProvider::LAST_NAMES);
+
+        return $lastName;
     }
 
     /**
@@ -320,7 +361,7 @@ class Faker
      */
     public static function ipv4(): string
     {
-        return self::repeatPatern('int', ':', 4, [['max' => 255, 'lenght' => 3]]);
+        return self::repeatPatern('int', ':', 4, [['max' => 255, 'length' => 3]]);
     }
 
     /**
@@ -336,7 +377,12 @@ class Faker
      */
     public static function word(): string
     {
-        return self::chooseValueFrom(FakerProvider::WORDS_LOREM);
+        /**
+         * @var string $word
+         */
+        $word = self::chooseValueFrom(FakerProvider::WORDS_LOREM);
+
+        return $word;
     }
 
     /**

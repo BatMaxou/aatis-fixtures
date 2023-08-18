@@ -22,8 +22,10 @@ class FakerListCommand extends Command
         $reflect = new \ReflectionClass(Faker::class);
         $methods = $reflect->getMethods();
         foreach ($methods as $method) {
-            preg_match('/\/\*\*\n     \* (.*)\n/', $method->getDocComment(), $match);
-            $this->infos[] = [$method->getName(), $match[1]];
+            if (17 === $method->getModifiers()) {
+                preg_match('/\/\*\*\n     \* (.*)\n/', $method->getDocComment(), $match);
+                $this->infos[] = [$method->getName(), $match[1]];
+            }
         }
     }
 
