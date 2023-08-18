@@ -1,3 +1,4 @@
+/config/fixtures
 /src/Command/TestCommand.php
-
 /vendor
+/var

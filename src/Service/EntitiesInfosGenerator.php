@@ -66,7 +66,8 @@ class EntitiesInfosGenerator
 
         foreach ($this->generateOrderedTableByPriority($allMetadata) as $fullName) {
             $name = '';
-            foreach (str_split(lcfirst(explode('\\', $fullName)[2])) as $letter) {
+            $explode = explode('\\', $fullName);
+            foreach (str_split(lcfirst(end($explode))) as $letter) {
                 if (ctype_upper($letter)) {
                     $name .= '_' . strtolower($letter);
                 } else {
@@ -74,7 +75,7 @@ class EntitiesInfosGenerator
                 }
             }
 
-            $infos[strtolower($name)] = ['class' => $fullName];
+            $infos[$name] = $fullName;
         }
 
         return $infos;

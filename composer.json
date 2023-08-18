@@ -8,7 +8,10 @@
         "doctrine/doctrine-bundle": "^2.10",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.15",
-        "symfony/yaml": "6.3.*"
+        "symfony/yaml": "6.3.*",
+        "symfony/runtime": "^6.3",
+        "symfony/orm-pack": "^2.3",
+        "symfony/dotenv": "^6.3"
     },
     "license": "MIT",
     "autoload": {
@@ -26,5 +29,10 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.23",
         "phpstan/phpstan": "^1.10"
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/runtime": true
+        }
     }
 }

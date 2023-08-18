@@ -37,7 +37,7 @@ class Faker
                 /**
                  * @var string|int
                  */
-                $result = call_user_func('self::' . $method, ...$parameters[$key]);
+                $result = call_user_func(self::class . '::' . $method, ...$parameters[$key]);
                 $isSet = true;
             }
 
@@ -45,7 +45,7 @@ class Faker
                 /**
                  * @var string|int
                  */
-                $result = call_user_func('self::' . $method);
+                $result = call_user_func(self::class . '::' . $method);
             }
             $patern = str_replace($matches[0][$i], (string) $result, $patern);
         }
@@ -71,7 +71,7 @@ class Faker
 
         $string = '';
         for ($i = 1; $i <= $nbPaternWanted; ++$i) {
-            $string .= strval(call_user_func('self::' . $functionName, ...$parameters));
+            $string .= strval(call_user_func(self::class . '::' . $functionName, ...$parameters));
 
             if ($i !== $nbPaternWanted) {
                 $string .= $separator;

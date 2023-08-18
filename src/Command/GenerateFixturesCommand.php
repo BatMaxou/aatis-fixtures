@@ -34,8 +34,12 @@ class GenerateFixturesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        if (!$yaml = Yaml::parseFile('./config/fixtures/config.yaml')) {
+        if (!is_readable('./config/fixtures/config.yaml')) {
             throw new ConfigNotFoundException('File "./config/fixtures/config.yaml" doesn\'t exist');
+        }
+
+        if (!$yaml = Yaml::parseFile('./config/fixtures/config.yaml')) {
+            throw new ConfigNotFoundException('Config in "./config/fixtures/config.yaml" not found, maybe your fil is empty');
         }
 
         $content = $this->generator->generate($yaml);
