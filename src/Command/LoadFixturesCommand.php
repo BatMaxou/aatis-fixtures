@@ -55,21 +55,41 @@ class LoadFixturesCommand extends Command
         $refreshInput = new ArrayInput([], $def);
         $refreshInput->setOption('force', true);
 
-        $refresh = $this->getApplication()->find('aatis:database:refresh');
-        if (1 === $refresh->execute($input, $output)) {
-            throw new ExecuteCommandException('Problem raise during the refresh of the database');
+        $app = $this->getApplication();
+        if (null !== $app) {
+            $refresh = $app->find('aatis:database:refresh');
+            if (1 === $refresh->execute($input, $output)) {
+                throw new ExecuteCommandException('Problem raise during the refresh of the database');
+            }
         }
 
-        if (!$yaml = Yaml::parseFile('./config/fixtures/config.yaml')) {
+        if (!is_readable('./config/fixtures/config.yaml')) {
             throw new ConfigNotFoundException('File "./config/fixtures/config.yaml" doesn\'t exist');
         }
 
-        $tables = [];
+        /**
+         * @var array<string, array{
+         *      iteration: 0,
+         *      model: array<array{
+         *          class: string
+         *      }|array{
+         *          entity: string
+         *      }|array{
+         *          type: string
+         *      }>,
+         *      data: array{}|array<int, array<int, int|string>>
+         * }> $yaml
+         */
+        $yaml = Yaml::parseFile('./config/fixtures/config.yaml') ?? throw new ConfigNotFoundException('Config in "./config/fixtures/config.yaml" not found, maybe your file is empty');
+
         if (isset($input->getArguments()['table'])) {
+            /**
+             * @var string[] $tables
+             */
             $tables = $input->getArguments()['table'];
         }
 
-        $this->loader->load($yaml, $io, $tables);
+        $this->loader->load($yaml, $io, $tables ?? []);
 
         return Command::SUCCESS;
     }

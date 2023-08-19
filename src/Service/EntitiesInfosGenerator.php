@@ -3,6 +3,7 @@
 namespace Aatis\FixturesBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 class EntitiesInfosGenerator
 {
@@ -18,8 +19,12 @@ class EntitiesInfosGenerator
         // $this->exclude = $exclude;
     }
 
-    private function generateOrderedTableByPriority($allMetadata): array
+    /**
+     * @return string[]
+     */
+    private function generateOrderedTableByPriority(): array
     {
+        $allMetadata = $this->em->getMetadataFactory()->getAllMetadata();
         $sortedEntities = [];
         $visited = [];
 
@@ -30,21 +35,27 @@ class EntitiesInfosGenerator
         return $sortedEntities;
     }
 
-    // le & permet à la fonction recursive de modifier directement le tableau/variable d'origine
-    private function visit($metadata, &$visited, &$sortedEntities): void
+    /**
+     * @template T of object
+     *
+     * @param ClassMetadataInfo<T> $metadata
+     * @param array<string, bool> $visited
+     * @param string[] $sortedEntities
+     */
+    private function visit(ClassMetadataInfo $metadata, array &$visited, array &$sortedEntities): void
     {
-        $entityName = $metadata->getName();
+        $fullName = $metadata->getName();
 
-        if (isset($visited[$entityName])) {
+        if (isset($visited[$fullName])) {
             return;
         }
 
-        $visited[$entityName] = true;
+        $visited[$fullName] = true;
 
         foreach ($metadata->getAssociationMappings() as $associationMapping) {
             if ($associationMapping['inversedBy']) {
-                $targetEntityName = $associationMapping['targetEntity'];
-                $targetEntity = $this->em->getClassMetadata($targetEntityName);
+                $targetFullName = $associationMapping['targetEntity'];
+                $targetEntity = $this->em->getClassMetadata($targetFullName);
                 $this->visit($targetEntity, $visited, $sortedEntities);
             }
         }
@@ -57,19 +68,21 @@ class EntitiesInfosGenerator
     /**
      * Generate array infos which contains all the entities of the app with there namespace, ordering by there creation priority.
      *
-     * @return array[string]array
+     * @return array<string, class-string<object>>
      */
     public function generate(): array
     {
         $infos = [];
-        $allMetadata = $this->em->getMetadataFactory()->getAllMetadata();
 
-        foreach ($this->generateOrderedTableByPriority($allMetadata) as $fullName) {
+        /**
+         * @var class-string<object> $fullName
+         */
+        foreach ($this->generateOrderedTableByPriority() as $fullName) {
             $name = '';
             $explode = explode('\\', $fullName);
             foreach (str_split(lcfirst(end($explode))) as $letter) {
                 if (ctype_upper($letter)) {
-                    $name .= '_' . strtolower($letter);
+                    $name .= '_'.strtolower($letter);
                 } else {
                     $name .= $letter;
                 }

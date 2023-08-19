@@ -1,4 +1,4 @@
 /config/fixtures
-/src/Command/TestCommand.php
 /vendor
 /var
+/.php-cs-fixer.cache

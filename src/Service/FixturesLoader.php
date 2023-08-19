@@ -73,7 +73,7 @@ class FixturesLoader
                             } else {
                                 $value = $data[$indexColumn];
                             }
-                            $setter = 'set' . ucfirst($column);
+                            $setter = 'set'.ucfirst($column);
                             $entity->$setter($value);
                             ++$indexColumn;
                         } else {
@@ -84,7 +84,7 @@ class FixturesLoader
                     ++$compt;
                 }
                 $this->em->flush();
-                $io->info($compt . ' row(s) inserted into : ' . $tableName);
+                $io->info($compt.' row(s) inserted into : '.$tableName);
             }
         }
 

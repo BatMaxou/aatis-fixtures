@@ -5,17 +5,33 @@ namespace Aatis\FixturesBundle\Service;
 use Aatis\FixturesBundle\Exception\MissingEntityRelationException;
 use Aatis\FixturesBundle\Exception\NotSupportedTypeException;
 
+/**
+ * @phpstan-type YamlType array<string, array{
+ *      iteration: int,
+ *      model: array<array{
+ *          class: string
+ *      }|array{
+ *          entity: string
+ *      }|array{
+ *          type: string,
+ *          parameters?: array<int, int|string|array<int|string, int|string>>
+ *      }>,
+ *      data: array{}|array<int, array<int, int|string>>
+ * }>
+ */
 class DataGenerator
 {
     /**
      * Generate fixtures base on the models given.
      *
-     * @return string[]
+     * @param YamlType $yaml
+     *
+     * @return YamlType
      *
      * @throws NotSupportedTypeException
      * @throws MissingEntityRelationException
      */
-    public function generate(array $yaml): array
+    public function generate(array $yaml)
     {
         foreach ($yaml as $tableName => $tableInfos) {
             $tableModel = $tableInfos['model'];
@@ -36,7 +52,7 @@ class DataGenerator
                         } else {
                             throw new MissingEntityRelationException(sprintf('Cannot create entity of instance %s, instance of parent class not found.', $tableName));
                         }
-                    } else {
+                    } elseif (isset($fakerInfos['type'])) {
                         $type = $fakerInfos['type'];
                         $data[] = (isset($fakerInfos['parameters'])) ? Faker::$type(...$fakerInfos['parameters']) : Faker::$type();
                     }

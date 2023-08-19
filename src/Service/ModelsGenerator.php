@@ -2,8 +2,6 @@
 
 namespace Aatis\FixturesBundle\Service;
 
-use Aatis\FixturesBundle\Service\EntitiesDictionary;
-
 class ModelsGenerator
 {
     private EntitiesDictionary $entitiesDictionary;
