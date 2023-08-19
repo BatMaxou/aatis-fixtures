@@ -2,6 +2,7 @@
 
 namespace Aatis\FixturesBundle\Command;
 
+use Aatis\FixturesBundle\Exception\FileRightsException;
 use Aatis\FixturesBundle\Service\ModelsGenerator;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Console\Command\Command;
@@ -41,8 +42,11 @@ class GenerateModelsCommand extends Command
             mkdir($dirname, 0o777, true);
         }
 
-        $file = fopen($path, 'w');
-        fwrite($file, Yaml::dump($content));
+        if ($file = fopen($path, 'w')) {
+            fwrite($file, Yaml::dump($content));
+        } else {
+            throw new FileRightsException('Can not access to the content of ./config/fixtures/config.yaml file');
+        }
 
         $io->success('Succeded to create models into file ./config/fixtures/config.yaml');
 

@@ -2,10 +2,11 @@
 
 namespace Aatis\FixturesBundle\Service;
 
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-
 class EntitiesDictionary
 {
+    /**
+     * @var array<string, class-string<object>>
+     */
     private array $infos;
 
     public function __construct(EntitiesInfosGenerator $generator)
@@ -16,7 +17,7 @@ class EntitiesDictionary
     /**
      * Generate array infos which contains all the entities of the app witth there namespace and there repository, ordering by there creation priority.
      *
-     * @return array[string]array
+     * @return array<string, class-string<object>>
      */
     public function getInfos(): array
     {
@@ -33,10 +34,28 @@ class EntitiesDictionary
         $entities = [];
 
         foreach ($this->infos as $key => $value) {
-            $entities[$key] = ['class' => $value['class']];
+            $entities[$key] = $value;
         }
 
         return $entities;
+    }
+
+    /**
+     * Return the ::class of the given entity name in snake_case.
+     *
+     * @return class-string<object>
+     */
+    public function getEntity(string $className): string
+    {
+        return $this->infos[$className];
+    }
+
+    /**
+     * Return the snake_case of the given class name.
+     */
+    public function getSnakeCase(string $class): string
+    {
+        return array_flip($this->infos)[$class];
     }
 
     /**
@@ -54,43 +73,30 @@ class EntitiesDictionary
      *
      * @param string $entityName the name of the target entity in snake_case
      *
-     * @return string[]|null
+     * @return string[]
      */
-    public function getProperties(string $entityName): ?array
+    public function getProperties(string $entityName): array
     {
         if (!array_key_exists($entityName, $this->infos)) {
-            return null;
+            return [];
         }
 
-        $reflection = new \ReflectionClass($this->infos[$entityName]['class']);
+        $reflection = new \ReflectionClass($this->infos[$entityName]);
         $properties = $reflection->getProperties();
-
         $accurateProperties = [];
-
         foreach ($properties as $property) {
-            if ('id' !== $property->getName()) {
-                if ('Doctrine\Common\Collections\Collection' !== $property->getType()->getName()) {
-                    $accurateProperties[$property->getName()] = str_replace('Interface', '', $property->getType()->getName());
+            $propertyName = $property->getName();
+            if ('id' !== $propertyName) {
+                /**
+                 * @var \ReflectionNamedType $propertyType
+                 */
+                $propertyType = $property->getType();
+                if ('Doctrine\Common\Collections\Collection' !== $propertyType->getName()) {
+                    $accurateProperties[$propertyName] = str_replace('Interface', '', $propertyType->getName());
                 }
             }
         }
 
         return $accurateProperties;
-    }
-
-    /**
-     * Return an array where the keys are the name of the your entities in snake_case and the value is the repository of this entity, ordering by there creation priority.
-     *
-     * @return ServiceEntityRepository[]
-     */
-    public function getRepositories(): array
-    {
-        $repositories = [];
-
-        foreach ($this->infos as $key => $value) {
-            $repositories[$key] = $value['repository'];
-        }
-
-        return $repositories;
     }
 }

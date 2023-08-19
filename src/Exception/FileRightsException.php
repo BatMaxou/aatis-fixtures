@@ -2,6 +2,6 @@
 
 namespace Aatis\FixturesBundle\Exception;
 
-class ClassNotFoundException extends \Exception
+class FileRightsException extends \Exception
 {
 }

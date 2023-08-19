@@ -3,10 +3,6 @@
 namespace Aatis\FixturesBundle\Command;
 
 use Doctrine\DBAL\Connection;
-use Aatis\FixturesBundle\Service\EntitiesDictionary;
-use Aatis\FixturesBundle\Exception\TruncateException;
-use Aatis\FixturesBundle\Exception\TableNotFoundException;
-use Aatis\FixturesBundle\Exception\ExecuteCommandException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,20 +10,25 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Aatis\FixturesBundle\Service\EntitiesDictionary;
+use Aatis\FixturesBundle\Exception\TruncateException;
 use Symfony\Component\Console\Output\OutputInterface;
+use Aatis\FixturesBundle\Exception\TableNotFoundException;
+use Aatis\FixturesBundle\Exception\ExecuteCommandException;
 
 #[AsCommand(
     name: 'aatis:database:refresh'
 )]
 class DatabaseRefreshCommand extends Command
 {
-    private $connection;
+    /**
+     * @var string[]
+     */
     private array $tableList;
 
-    public function __construct(Connection $connection, EntitiesDictionary $EntitiesDictionary)
+    public function __construct(private readonly Connection $connection, EntitiesDictionary $EntitiesDictionary)
     {
         parent::__construct();
-        $this->connection = $connection;
         $this->tableList = $EntitiesDictionary->getEntitiesNames();
     }
 
@@ -49,42 +50,52 @@ class DatabaseRefreshCommand extends Command
 
             return Command::INVALID;
         }
-        // if any table are given
-        if (0 === count($input->getArgument('table'))) {
-            $drop = $this->getApplication()->find('doctrine:database:drop');
-            $create = $this->getApplication()->find('doctrine:database:create');
-            $schema = $this->getApplication()->find('doctrine:schema:update');
 
-            if (!$drop || !$create || !$schema) {
-                $io->error('Failure when executing the command');
-                $io->text('Make sure you have access to the followings doctrine commands :');
-                $io->listing([
-                    'doctrine:database:drop',
-                    'doctrine:database:create',
-                    'doctrine:schema:update',
-                ]);
+        /**
+         * @var string[] $tables
+         */
+        $tables = $input->getArgument('table');
+        if (0 === count($tables)) {
+            $app = $this->getApplication();
+            if ($app) {
+                try {
+                    $drop = $app->find('doctrine:database:drop');
+                    $create = $app->find('doctrine:database:create');
+                    $schema = $app->find('doctrine:schema:update');
+                } catch (\Throwable) {
+                    $io->error('Failure when executing the command');
+                    $io->text('Make sure you have access to the followings doctrine commands :');
+                    $io->listing([
+                        'doctrine:database:drop',
+                        'doctrine:database:create',
+                        'doctrine:schema:update',
+                    ]);
 
-                return Command::FAILURE;
+                    return Command::FAILURE;
+                }
+
+                if (0 !== $drop->run($input, $output)) {
+                    $io->warning('Ignoring the drop database step');
+                } else {
+                    $io->success('Succeded to drop database');
+                }
+
+                $inputCreate = new ArrayInput([]);
+
+                if (0 !== $create->run($inputCreate, $output)) {
+                    throw new ExecuteCommandException('Failure when executing the command : doctrine:database:create');
+                }
+                $io->success('Succeded to create database');
+
+                if (0 !== $schema->run($input, $output)) {
+                    throw new ExecuteCommandException('Failure when executing the command : doctrine:schema:update');
+                }
+                $io->success('Succeded to update the database schema');
             }
-
-            if (0 !== $drop->run($input, $output)) {
-                $io->warning('Ignoring the drop database step');
-            } else {
-                $io->success('Succeded to drop database');
-            }
-
-            $inputCreate = new ArrayInput([]);
-
-            if (0 !== $create->run($inputCreate, $output)) {
-                throw new ExecuteCommandException('Failure when executing the command : doctrine:database:create');
-            }
-            $io->success('Succeded to create database');
-
-            if (0 !== $schema->run($input, $output)) {
-                throw new ExecuteCommandException('Failure when executing the command : doctrine:schema:update');
-            }
-            $io->success('Succeded to update the database schema');
         } else {
+            /**
+             * @var string[] $tables
+             */
             $tables = $input->getArgument('table');
 
             foreach ($tables as $table) {
@@ -99,15 +110,14 @@ class DatabaseRefreshCommand extends Command
     /**
      * Truncate the table given.
      *
-     *
      * @throws TruncateException
      * @throws TableNotFoundException
      */
     private function truncateTable(string $table): void
     {
         if (in_array($table, $this->tableList)) {
-            $delete = $this->connection->prepare('DELETE FROM '.$table);
-            $resetIncrement = $this->connection->prepare('ALTER TABLE '.$table.' AUTO_INCREMENT=0');
+            $delete = $this->connection->prepare('DELETE FROM ' . $table);
+            $resetIncrement = $this->connection->prepare('ALTER TABLE ' . $table . ' AUTO_INCREMENT=0');
             try {
                 $delete->executeQuery();
                 $resetIncrement->executeQuery();

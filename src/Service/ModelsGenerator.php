@@ -4,29 +4,39 @@ namespace Aatis\FixturesBundle\Service;
 
 class ModelsGenerator
 {
-    private EntitiesDictionary $EntitiesDictionary;
+    private EntitiesDictionary $entitiesDictionary;
 
-    public function __construct(EntitiesDictionary $EntitiesDictionary)
+    public function __construct(EntitiesDictionary $entitiesDictionary)
     {
-        $this->EntitiesDictionary = $EntitiesDictionary;
+        $this->entitiesDictionary = $entitiesDictionary;
     }
 
     /**
      * Generate an array of arrays where each one represent one of your entities with the infos of each of there properties.
      *
-     * @return array[string]array
+     * @return array<string, array{
+     *      iteration: 0,
+     *      model: array<array{
+     *          class: string
+     *      }|array{
+     *          entity: string
+     *      }|array{
+     *          type: string
+     *      }>,
+     *      data: array{}
+     * }>
      */
     public function generate(): array
     {
         $content = [];
-        $entitiesNames = $this->EntitiesDictionary->getEntitiesNames();
+        $entitiesNames = $this->entitiesDictionary->getEntitiesNames();
 
         foreach ($entitiesNames as $name) {
             $model = [];
 
-            foreach ($this->EntitiesDictionary->getProperties($name) as $propertyName => $type) {
-                if (str_starts_with($type, 'App\\Entity\\')) {
-                    $model[$propertyName] = ['entity' => lcfirst(str_replace('App\\Entity\\', '', $type))];
+            foreach ($this->entitiesDictionary->getProperties($name) as $propertyName => $type) {
+                if (preg_match('/^(([a-zA-Z0-9]|\\\)*)\\\Entity\\\(([a-zA-Z0-9]|\\\)*)$/', $type, $matches)) {
+                    $model[$propertyName] = ['entity' => $this->entitiesDictionary->getSnakeCase($type)];
                 } elseif (ctype_upper($type[0])) {
                     $model[$propertyName] = ['class' => $type];
                 } else {
