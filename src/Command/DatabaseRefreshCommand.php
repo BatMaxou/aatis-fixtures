@@ -116,8 +116,8 @@ class DatabaseRefreshCommand extends Command
     private function truncateTable(string $table): void
     {
         if (in_array($table, $this->tableList)) {
-            $delete = $this->connection->prepare('DELETE FROM ' . $table);
-            $resetIncrement = $this->connection->prepare('ALTER TABLE ' . $table . ' AUTO_INCREMENT=0');
+            $delete = $this->connection->prepare('DELETE FROM '.$table);
+            $resetIncrement = $this->connection->prepare('ALTER TABLE '.$table.' AUTO_INCREMENT=0');
             try {
                 $delete->executeQuery();
                 $resetIncrement->executeQuery();
