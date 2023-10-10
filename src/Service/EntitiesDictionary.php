@@ -86,10 +86,15 @@ class EntitiesDictionary
         $accurateProperties = [];
         foreach ($properties as $property) {
             $isColumnInDatabase = false;
+            $isJson = false;
 
-            foreach ($property->getAttributes() as $attributes) {
-                if (!str_starts_with($attributes->getName(), 'Doctrine\ORM\Mapping')) {
+            foreach ($property->getAttributes() as $attribute) {
+                if (!str_starts_with($attribute->getName(), 'Doctrine\ORM\Mapping')) {
                     continue;
+                }
+
+                if (isset($attribute->getArguments()['type']) && 'json' === $attribute->getArguments()['type']) {
+                    $isJson = true;
                 }
 
                 $isColumnInDatabase = true;
@@ -101,12 +106,19 @@ class EntitiesDictionary
 
             $propertyName = $property->getName();
             if ('id' !== $propertyName) {
+                if ($isJson) {
+                    $accurateProperties[$propertyName] = 'json';
+
+                    continue;
+                }
+
                 /**
                  * @var \ReflectionNamedType $propertyType
                  */
                 $propertyType = $property->getType();
-                if ('Doctrine\Common\Collections\Collection' !== $propertyType->getName()) {
-                    $accurateProperties[$propertyName] = str_replace('Interface', '', $propertyType->getName());
+                $propertyTypeName = $propertyType->getName();
+                if ('Doctrine\Common\Collections\Collection' !== $propertyTypeName) {
+                    $accurateProperties[$propertyName] = str_replace('Interface', '', $propertyTypeName);
                 }
             }
         }
