@@ -85,6 +85,20 @@ class EntitiesDictionary
         $properties = $reflection->getProperties();
         $accurateProperties = [];
         foreach ($properties as $property) {
+            $isColumnInDatabase = false;
+
+            foreach ($property->getAttributes() as $attributes) {
+                if (!str_starts_with($attributes->getName(), 'Doctrine\ORM\Mapping')) {
+                    continue;
+                }
+
+                $isColumnInDatabase = true;
+            }
+
+            if (!$isColumnInDatabase) {
+                continue;
+            }
+
             $propertyName = $property->getName();
             if ('id' !== $propertyName) {
                 /**
