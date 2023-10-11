@@ -404,8 +404,13 @@ class Faker
      */
     public static function text(int $nbWords): string
     {
+        if ($nbWords < 1) {
+            return '';
+        }
+
         $reset = true;
         $text = ucfirst(self::word());
+
         for ($i = 2; $i <= $nbWords; ++$i) {
             if ($reset) {
                 $reset = false;
@@ -432,7 +437,7 @@ class Faker
      *
      * @param array<array{
      *      type: string,
-     *      parameters?: array<string|int, string|int>
+     *      parameters?: mixed[]
      * }> $parameters array including the type of data you want for each key of your json
      */
     public static function json(array $parameters = []): string
@@ -460,11 +465,11 @@ class Faker
     /**
      * Return a string with an array into, which can be personalize.
      *
-     * @param array<array{
-     *      type: string,
-     *      parameters?: array<string|int, string|int>,
+     * @param array{
+     *      type?: string,
+     *      parameters?: mixed[],
      *      lenght?: int
-     * }> $parameters array including the type of data you want for each key of your array
+     * } $parameters array including the type of data you want for each key of your array
      */
     public static function array(array $parameters = []): string
     {
