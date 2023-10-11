@@ -1,28 +1,28 @@
 project:
-    iteration: 3
-    model: { name: { type: string }, nbMin: { type: int }, date: { class: DateTime } }
-    data: [[aywor, 589, '2023-08-18 15:25:59'], [kexzj, 582, '2023-08-18 15:25:59'], [fcigw, 536, '2023-08-18 15:25:59']]
+    iteration: 1
+    model: { name: { type: json, parameters: [{ test: { type: int, parameters: [{ max: 10 }] } }] }, nbMin: { type: int }, date: { class: DateTime } }
+    data: [['{"test":4}', 802, '2023-10-11 12:26:34']]
 company:
-    iteration: 3
+    iteration: 0
     model: { name: { type: string }, creationDate: { class: DateTime } }
-    data: [[nmswo, '2023-08-18 15:25:59'], [jfhze, '2023-08-18 15:25:59'], [lvyjk, '2023-08-18 15:25:59']]
+    data: {  }
 person:
     iteration: 0
     model: { name: { type: string }, company: { entity: company } }
-    data: [[bkxrr, 1], [gndij, 3], [kptbz, 2]]
+    data: {  }
 garage:
-    iteration: 3
+    iteration: 0
     model: { name: { type: string } }
-    data: [[zdcua], [legbz], [vemiy]]
+    data: {  }
 car:
     iteration: 0
     model: { name: { type: string }, person: { entity: person }, garage: { entity: garage } }
-    data: [[megph, 3, 3], [kjtcf, 1, 3], [cmvaf, 1, 2]]
+    data: {  }
 house:
     iteration: 0
     model: { name: { type: string }, person: { entity: person } }
-    data: [[gjyom, 3], [aszju, 1], [ovfqr, 3]]
+    data: {  }
 project_person_assoc:
-    iteration: 3
+    iteration: 0
     model: { project: { entity: project }, person: { entity: person } }
-    data: [[2, 2], [1, 2], [3, 2]]
+    data: {  }
