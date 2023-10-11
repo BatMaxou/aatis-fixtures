@@ -34,7 +34,6 @@ class ModelsGenerator
         foreach ($entitiesNames as $name) {
             $model = [];
 
-
             foreach ($this->entitiesDictionary->getProperties($name) as $propertyName => $arguments) {
                 if (isset($arguments['unique']) && $arguments['unique']) {
                     $model[$propertyName]['unique'] = true;

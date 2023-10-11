@@ -119,10 +119,9 @@ class DataGenerator
             $this->uniqueData[$attributeName] = [];
         }
 
-
-        $data = call_user_func_array(array($this, $callback), $args);
+        $data = call_user_func_array([$this, $callback], $args);
         while (in_array($data, $this->uniqueData[$attributeName])) {
-            $data = call_user_func_array(array($this, $callback), $args);
+            $data = call_user_func_array([$this, $callback], $args);
         }
         $this->uniqueData[$attributeName][] = $data;
 

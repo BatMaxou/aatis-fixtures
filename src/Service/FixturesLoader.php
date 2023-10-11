@@ -4,7 +4,6 @@ namespace Aatis\FixturesBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Aatis\FixturesBundle\Service\ConstructorWarner;
 use Aatis\FixturesBundle\Exception\ClassNotFoundException;
 use Aatis\FixturesBundle\Exception\EntityNotFoundException;
 use Aatis\FixturesBundle\Exception\MissingArgumentException;
@@ -89,7 +88,7 @@ class FixturesLoader
                                     $this->constructorWarner->refresh();
                                 }
                             } else {
-                                $setter = 'set' . ucfirst($column);
+                                $setter = 'set'.ucfirst($column);
                                 $entity->$setter($value);
                             }
                             ++$indexColumn;

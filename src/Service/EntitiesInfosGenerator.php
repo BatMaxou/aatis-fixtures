@@ -91,7 +91,7 @@ class EntitiesInfosGenerator
             $explode = explode('\\', $fullName);
             foreach (str_split(lcfirst(end($explode))) as $letter) {
                 if (ctype_upper($letter)) {
-                    $name .= '_' . strtolower($letter);
+                    $name .= '_'.strtolower($letter);
                 } else {
                     $name .= $letter;
                 }
