@@ -23,7 +23,7 @@ class Faker
             /**
              * @var callable $callable
              */
-            $callable = self::class.'::'.$method;
+            $callable = self::class . '::' . $method;
             $result = '';
             $isSet = false;
 
@@ -74,7 +74,7 @@ class Faker
             /**
              * @var callable $callable
              */
-            $callable = self::class.'::'.$functionName;
+            $callable = self::class . '::' . $functionName;
             $paternElement = call_user_func($callable, ...$parameters);
 
             $string = self::addElementToString($string, $paternElement);
@@ -237,7 +237,7 @@ class Faker
 
         $string = strval(self::int(['min' => $min, 'max' => $max]));
         while (strlen($string) < $length) {
-            $string = '0'.$string;
+            $string = '0' . $string;
         }
 
         return $string;
@@ -362,10 +362,10 @@ class Faker
     public static function company(): string
     {
         $body = self::bool() ? self::chooseValueFrom(['lastName', 'int']) : null;
-        $body = isset($body) ? ' '.self::$body().' ' : self::chooseValueFrom(['&', ' and ', ' ']);
+        $body = isset($body) ? ' ' . self::$body() . ' ' : self::chooseValueFrom(['&', ' and ', ' ']);
         $extension = (self::oneOn(10)) ? '™' : '';
 
-        return self::chooseValueFrom(FakerProvider::COMPANY_PREFIXES).$body.self::chooseValueFrom(FakerProvider::COMPANY_SUFFIXES).$extension;
+        return self::chooseValueFrom(FakerProvider::COMPANY_PREFIXES) . $body . self::chooseValueFrom(FakerProvider::COMPANY_SUFFIXES) . $extension;
     }
 
     /**
@@ -409,9 +409,9 @@ class Faker
         for ($i = 2; $i <= $nbWords; ++$i) {
             if ($reset) {
                 $reset = false;
-                $text .= ' '.ucfirst(self::word());
+                $text .= ' ' . ucfirst(self::word());
             } else {
-                $text .= ' '.self::word();
+                $text .= ' ' . self::word();
             }
 
             if ($i === $nbWords) {
@@ -433,7 +433,7 @@ class Faker
      * @param array<array{
      *      type: string,
      *      parameters?: array<string|int, string|int>
-     * }> $parameters array including the parameters of the methods given into the patern
+     * }> $parameters array including the type of data you want for each key of your json
      */
     public static function json(array $parameters = []): string
     {
@@ -459,9 +459,32 @@ class Faker
 
     /**
      * Return a json which can be personalize.
+     * 
+     * @param array<array{
+     *      type: string,
+     *      parameters?: array<string|int, string|int>,
+     *      lenght?: int
+     * }> $parameters array including the type of data you want for each key of your array
      */
-    public static function array(string $type = 'string'): string
+    public static function array(array $parameters = []): string
     {
-        return '[]';
+        if (empty($parameters)) {
+            return '[]';
+        }
+
+        $lenght = $parameters['lenght'] ?? 3;
+
+        if ($lenght < 0) {
+            return '[]';
+        }
+
+        $returned = [];
+
+        for ($i = 0; $i < $lenght; $i++) {
+            $method = $parameters['type'];
+            $returned[] = isset($parameters['parameters']) ? self::$method(...$parameters['parameters']) : self::$method();
+        }
+
+        return '[' . join(', ', $returned) . ']';
     }
 }
