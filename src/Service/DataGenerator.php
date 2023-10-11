@@ -22,6 +22,11 @@ use Aatis\FixturesBundle\Exception\NotSupportedTypeException;
 class DataGenerator
 {
     /**
+     * @var array<string, array<int, int|string>>
+     */
+    private array $uniqueData = [];
+
+    /**
      * Generate fixtures base on the models given.
      *
      * @param YamlType $yaml
@@ -39,28 +44,88 @@ class DataGenerator
 
             for ($i = 0; $i < $iteration; ++$i) {
                 $data = [];
-                foreach ($tableModel as $fakerInfos) {
+                foreach ($tableModel as $attributeName => $fakerInfos) {
                     if (isset($fakerInfos['class'])) {
-                        if ('DateTime' === $fakerInfos['class']) {
-                            $data[] = strval((new $fakerInfos['class']())->format('Y-m-d H:i:s'));
+                        if ($this->isUnique($fakerInfos)) {
+                            $data[] = $this->handleUnique($attributeName, 'generateDateTime', [$fakerInfos]);
                         } else {
-                            throw new NotSupportedTypeException(sprintf('Type "%s" is not supported.', $fakerInfos['class']));
+                            $data[] = $this->generateDateTime($fakerInfos);
                         }
                     } elseif (isset($fakerInfos['entity'])) {
-                        if ($yaml[$fakerInfos['entity']]['iteration'] > 0) {
-                            $data[] = Faker::int(['min' => 1, 'max' => $yaml[$fakerInfos['entity']]['iteration']]);
+                        if ($this->isUnique($fakerInfos)) {
+                            $data[] = $this->handleUnique($attributeName, 'generateRelation', [$yaml[$fakerInfos['entity']]['iteration'], $tableName], ['iteration' => $iteration]);
                         } else {
-                            throw new MissingEntityRelationException(sprintf('Cannot create entity of instance %s, instance of parent class not found.', $tableName));
+                            $data[] = $this->generateRelation($yaml[$fakerInfos['entity']]['iteration'], $tableName);
                         }
                     } elseif (isset($fakerInfos['type'])) {
                         $type = $fakerInfos['type'];
-                        $data[] = (isset($fakerInfos['parameters'])) ? Faker::$type(...$fakerInfos['parameters']) : Faker::$type();
+                        if ($this->isUnique($fakerInfos)) {
+                            $data[] = $this->handleUnique($attributeName, 'generateOtherData', [$fakerInfos, $type]);
+                        } else {
+                            $data[] = $this->generateOtherData($fakerInfos, $type);
+                        }
                     }
                 }
                 $yaml[$tableName]['data'][$i] = $data;
             }
+            $this->uniqueData = [];
         }
 
         return $yaml;
+    }
+
+    /**
+     * Generate a DateTime.
+     */
+    private function generateDateTime(array $fakerInfos): string
+    {
+        if ('DateTime' === $fakerInfos['class']) {
+            return strval((new $fakerInfos['class']())->format('Y-m-d H:i:s'));
+        } else {
+            throw new NotSupportedTypeException(sprintf('Type "%s" is not supported.', $fakerInfos['class']));
+        }
+    }
+
+    /**
+     * Generate a the index of the related entity.
+     */
+    private function generateRelation(int $relatedEntityIteration, string $tableName): int
+    {
+        if ($relatedEntityIteration > 0) {
+            return Faker::int(['min' => 1, 'max' => $relatedEntityIteration]);
+        } else {
+            throw new MissingEntityRelationException(sprintf('Cannot create entity of instance %s, instance of parent class not found.', $tableName));
+        }
+    }
+
+    /**
+     * Generate other data with faker.
+     *
+     * @param string $type The name of the faker method
+     */
+    private function generateOtherData(array $fakerInfos, string $type): mixed
+    {
+        return (isset($fakerInfos['parameters'])) ? Faker::$type(...$fakerInfos['parameters']) : Faker::$type();
+    }
+
+    private function isUnique(array $fakerInfos): bool
+    {
+        return isset($fakerInfos['unique']) && $fakerInfos['unique'];
+    }
+
+    private function handleUnique(string $attributeName, string $callback, array $args, $options = [])
+    {
+        if (!isset($this->uniqueData[$attributeName])) {
+            $this->uniqueData[$attributeName] = [];
+        }
+
+
+        $data = call_user_func_array(array($this, $callback), $args);
+        while (in_array($data, $this->uniqueData[$attributeName])) {
+            $data = call_user_func_array(array($this, $callback), $args);
+        }
+        $this->uniqueData[$attributeName][] = $data;
+
+        return $data;
     }
 }

@@ -116,9 +116,26 @@ class EntitiesDictionary
                  * @var \ReflectionNamedType $propertyType
                  */
                 $propertyType = $property->getType();
+                if (null === $propertyType) {
+                    throw new \Exception('Type error in EntitiesDictionary class');
+                }
+
                 $propertyTypeName = $propertyType->getName();
-                if ('Doctrine\Common\Collections\Collection' !== $propertyTypeName) {
-                    $accurateProperties[$propertyName] = str_replace('Interface', '', $propertyTypeName);
+
+                foreach ($property->getAttributes() as $attribute) {
+                    if (
+                        (in_array('unique', array_keys($attribute->getArguments())) && $attribute->getArguments()['unique'])
+                        || 'Doctrine\ORM\Mapping\OneToOne' === $attribute->getName()
+                    ) {
+                        $accurateProperties[$propertyName]['unique'] = true;
+                    }
+                }
+
+                if (
+                    'Doctrine\Common\Collections\Collection' !== $propertyTypeName
+                    && 'array' !== $propertyTypeName
+                ) {
+                    $accurateProperties[$propertyName]['type'] = str_replace('Interface', '', $propertyTypeName);
                 }
             }
         }
