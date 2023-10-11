@@ -43,7 +43,7 @@ class GenerateModelsCommand extends Command
         }
 
         if ($file = fopen($path, 'w')) {
-            fwrite($file, Yaml::dump($content));
+            fwrite($file, Yaml::dump($content, 3));
         } else {
             throw new FileRightsException('Can not access to the content of ./config/fixtures/config.yaml file');
         }

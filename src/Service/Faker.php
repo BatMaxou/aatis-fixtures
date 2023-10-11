@@ -458,8 +458,8 @@ class Faker
     }
 
     /**
-     * Return a json which can be personalize.
-     * 
+     * Return a string with an array into, which can be personalize.
+     *
      * @param array<array{
      *      type: string,
      *      parameters?: array<string|int, string|int>,
@@ -480,7 +480,7 @@ class Faker
 
         $returned = [];
 
-        for ($i = 0; $i < $lenght; $i++) {
+        for ($i = 0; $i < $lenght; ++$i) {
             $method = $parameters['type'];
             $returned[] = isset($parameters['parameters']) ? self::$method(...$parameters['parameters']) : self::$method();
         }
