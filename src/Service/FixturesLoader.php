@@ -88,7 +88,7 @@ class FixturesLoader
                                     $this->constructorWarner->refresh();
                                 }
                             } else {
-                                $setter = 'set'.ucfirst($column);
+                                $setter = 'set' . ucfirst($column);
                                 $entity->$setter($value);
                             }
                             ++$indexColumn;
@@ -97,8 +97,10 @@ class FixturesLoader
                         }
                     }
 
-                    $this->em->persist($entity);
-                    ++$compt;
+                    if (null !== $entity) {
+                        $this->em->persist($entity);
+                        ++$compt;
+                    }
                 }
                 $this->em->flush();
                 $io->info(sprintf('%d row(s) inserted into : %s', $compt, $tableName));

@@ -73,7 +73,15 @@ class EntitiesDictionary
      *
      * @param string $entityName the name of the target entity in snake_case
      *
-     * @return string[]
+     * @return array<string, array{
+     *    type: string,
+     *    unique?: bool,
+     * }>
+     * 
+     * array<string, 'json'|array{
+     *      unique: true,
+     *      type?: string
+     * }>
      */
     public function getProperties(string $entityName): array
     {
@@ -107,7 +115,7 @@ class EntitiesDictionary
             $propertyName = $property->getName();
             if ('id' !== $propertyName) {
                 if ($isJson) {
-                    $accurateProperties[$propertyName] = 'json';
+                    $accurateProperties[$propertyName]['type'] = 'json';
 
                     continue;
                 }

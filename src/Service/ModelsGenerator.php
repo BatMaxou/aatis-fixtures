@@ -15,13 +15,12 @@ class ModelsGenerator
      * Generate an array of arrays where each one represent one of your entities with the infos of each of there properties.
      *
      * @return array<string, array{
-     *      iteration: 0,
-     *      model: array<array{
-     *          class: string
-     *      }|array{
-     *          entity: string
-     *      }|array{
-     *          type: string
+     *      iteration: 5,
+     *      model: array<string, array{
+     *          class?: string,
+     *          entity?: string,
+     *          type?: string,
+     *          unique?: true
      *      }>,
      *      data: array{}
      * }>
