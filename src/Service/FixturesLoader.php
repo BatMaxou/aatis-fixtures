@@ -88,7 +88,7 @@ class FixturesLoader
                                     $this->constructorWarner->refresh();
                                 }
                             } else {
-                                $setter = 'set' . ucfirst($column);
+                                $setter = 'set'.ucfirst($column);
                                 $entity->$setter($value);
                             }
                             ++$indexColumn;

@@ -1,9 +1,8 @@
 A faire:
-    - gerer le cas de l'attribut array quand json (entity Task)
     - datagenerate avec les uniques (Exception)
     - options format pour le datetime
 
 dernier travail fait :
-    - ConstructorWarner
+    - phpstan
     - gerer les 'unique' (unique / OneToOne)
-    - FixturesLoader en cours de modif
+    - ConstructorWarner

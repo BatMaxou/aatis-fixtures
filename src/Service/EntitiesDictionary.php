@@ -73,14 +73,9 @@ class EntitiesDictionary
      *
      * @param string $entityName the name of the target entity in snake_case
      *
-     * @return array<string, array{
+     * @return array{}|array<non-empty-string, array{}|array{
      *    type: string,
      *    unique?: bool,
-     * }>
-     * 
-     * array<string, 'json'|array{
-     *      unique: true,
-     *      type?: string
      * }>
      */
     public function getProperties(string $entityName): array
@@ -124,10 +119,6 @@ class EntitiesDictionary
                  * @var \ReflectionNamedType $propertyType
                  */
                 $propertyType = $property->getType();
-                if (null === $propertyType) {
-                    throw new \Exception('Type error in EntitiesDictionary class');
-                }
-
                 $propertyTypeName = $propertyType->getName();
 
                 foreach ($property->getAttributes() as $attribute) {

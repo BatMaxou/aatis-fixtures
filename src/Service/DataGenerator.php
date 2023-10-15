@@ -9,20 +9,19 @@ use Aatis\FixturesBundle\Exception\NotSupportedTypeException;
  * @phpstan-type YamlType array<string, array{
  *      iteration: int,
  *      model: array<array{
- *          class: string
- *      }|array{
- *          entity: string
- *      }|array{
- *          type: string,
- *          parameters?: array<int, int|string|array<int|string, int|string>>
+ *          type?: string,
+ *          class?: string,
+ *          entity?: string,
+ *          parameters?: array<int, int|string|array<int|string, int|string>>,
+ *          unique?: bool
  *      }>,
- *      data: array{}|array<int, array<int, int|string>>
+ *      data: array{}|array<int, array<int, mixed>>
  * }>
  */
 class DataGenerator
 {
     /**
-     * @var array<string, array<int, int|string>>
+     * @var array<string, mixed[]>
      */
     private array $uniqueData = [];
 
@@ -47,20 +46,38 @@ class DataGenerator
                 foreach ($tableModel as $attributeName => $fakerInfos) {
                     if (isset($fakerInfos['class'])) {
                         if ($this->isUnique($fakerInfos)) {
-                            $data[] = $this->handleUnique($attributeName, 'generateDateTime', [$fakerInfos]);
+                            /**
+                             * @var array<int, array{
+                             *      class: string,
+                             *      unique: true
+                             * }> $args
+                             */
+                            $args = [$fakerInfos];
+                            $data[] = $this->handleUnique($attributeName, 'generateDateTime', $args);
                         } else {
                             $data[] = $this->generateDateTime($fakerInfos);
                         }
                     } elseif (isset($fakerInfos['entity'])) {
                         if ($this->isUnique($fakerInfos)) {
-                            $data[] = $this->handleUnique($attributeName, 'generateRelation', [$yaml[$fakerInfos['entity']]['iteration'], $tableName], ['iteration' => $iteration]);
+                            /**
+                             * @var array<int, int|string> $args
+                             */
+                            $args = [$yaml[$fakerInfos['entity']]['iteration'], $tableName];
+                            $data[] = $this->handleUnique($attributeName, 'generateRelation', $args, ['iteration' => $iteration]);
                         } else {
                             $data[] = $this->generateRelation($yaml[$fakerInfos['entity']]['iteration'], $tableName);
                         }
                     } elseif (isset($fakerInfos['type'])) {
                         $type = $fakerInfos['type'];
                         if ($this->isUnique($fakerInfos)) {
-                            $data[] = $this->handleUnique($attributeName, 'generateOtherData', [$fakerInfos, $type]);
+                            /**
+                             * @var array<int, array{
+                             *      class: string,
+                             *      unique: true
+                             * }|string> $args
+                             */
+                            $args = [$fakerInfos, $type];
+                            $data[] = $this->handleUnique($attributeName, 'generateOtherData', $args);
                         } else {
                             $data[] = $this->generateOtherData($fakerInfos, $type);
                         }
@@ -76,6 +93,11 @@ class DataGenerator
 
     /**
      * Generate a DateTime.
+     *
+     * @param array{
+     *      class: string,
+     *      unique?: bool
+     *  } $fakerInfos
      */
     private function generateDateTime(array $fakerInfos): string
     {
@@ -101,6 +123,11 @@ class DataGenerator
     /**
      * Generate other data with faker.
      *
+     * @param array{
+     *      type: string,
+     *      parameters?: array<int, int|string|array<int|string, int|string>>,
+     *      unique?: bool
+     *  } $fakerInfos The infos for the faker method
      * @param string $type The name of the faker method
      */
     private function generateOtherData(array $fakerInfos, string $type): mixed
@@ -108,20 +135,50 @@ class DataGenerator
         return (isset($fakerInfos['parameters'])) ? Faker::$type(...$fakerInfos['parameters']) : Faker::$type();
     }
 
+    /**
+     * Check if the attribute is unique.
+     *
+     * @param array{
+     *      type?: string,
+     *      class?: string,
+     *      entity?: string,
+     *      parameters?: array<int, int|string|array<int|string, int|string>>,
+     *      unique?: bool
+     *  } $fakerInfos The infos for the faker method
+     */
     private function isUnique(array $fakerInfos): bool
     {
         return isset($fakerInfos['unique']) && $fakerInfos['unique'];
     }
 
-    private function handleUnique(string $attributeName, string $callback, array $args, $options = [])
+    /**
+     * Handle the unique data.
+     *
+     * @param array<int, int|string>|array<int, array{
+     *      class: string,
+     *      unique: true
+     * }|string>|array<int, array{
+     *      class: string,
+     *      unique: true
+     * }> $args The arguments for the faker method
+     * @param mixed[] $options
+     *
+     * @return mixed
+     */
+    private function handleUnique(string $attributeName, string $callback, array $args, array $options = [])
     {
         if (!isset($this->uniqueData[$attributeName])) {
             $this->uniqueData[$attributeName] = [];
         }
 
-        $data = call_user_func_array([$this, $callback], $args);
+        /**
+         * @var callable $callable
+         */
+        $callable = [$this, $callback];
+
+        $data = call_user_func_array($callable, $args);
         while (in_array($data, $this->uniqueData[$attributeName])) {
-            $data = call_user_func_array([$this, $callback], $args);
+            $data = call_user_func_array($callable, $args);
         }
         $this->uniqueData[$attributeName][] = $data;
 

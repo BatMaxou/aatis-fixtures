@@ -4,6 +4,9 @@ namespace Aatis\FixturesBundle\Service;
 
 class ConstructorWarner
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $parameters = [];
 
     public function init(\ReflectionMethod $construct): void
@@ -29,6 +32,9 @@ class ConstructorWarner
         return true;
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     public function getParameters(): array
     {
         return array_values($this->parameters);

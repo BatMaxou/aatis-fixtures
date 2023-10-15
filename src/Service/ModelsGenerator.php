@@ -38,12 +38,14 @@ class ModelsGenerator
                     $model[$propertyName]['unique'] = true;
                 }
 
-                if (preg_match('/^(([a-zA-Z0-9]|\\\)*)\\\Entity\\\(([a-zA-Z0-9]|\\\)*)$/', $arguments['type'], $matches)) {
-                    $model[$propertyName]['entity'] = $this->entitiesDictionary->getSnakeCase($arguments['type']);
-                } elseif (ctype_upper($arguments['type'][0])) {
-                    $model[$propertyName]['class'] = $arguments['type'];
-                } else {
-                    $model[$propertyName]['type'] = $arguments['type'];
+                if (isset($arguments['type'])) {
+                    if (preg_match('/^(([a-zA-Z0-9]|\\\)*)\\\Entity\\\(([a-zA-Z0-9]|\\\)*)$/', $arguments['type'], $matches)) {
+                        $model[$propertyName]['entity'] = $this->entitiesDictionary->getSnakeCase($arguments['type']);
+                    } elseif (ctype_upper($arguments['type'][0])) {
+                        $model[$propertyName]['class'] = $arguments['type'];
+                    } else {
+                        $model[$propertyName]['type'] = $arguments['type'];
+                    }
                 }
             }
 
