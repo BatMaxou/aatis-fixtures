@@ -53,10 +53,19 @@ class EntitiesInfosGenerator
         $visited[$fullName] = true;
 
         foreach ($metadata->getAssociationMappings() as $associationMapping) {
-            if ($associationMapping['inversedBy']) {
-                $targetFullName = $associationMapping['targetEntity'];
-                $targetEntity = $this->em->getClassMetadata($targetFullName);
-                $this->visit($targetEntity, $visited, $sortedEntities);
+            $reflexion = new \ReflectionClass($fullName);
+            $property = $reflexion->getProperty($associationMapping['fieldName']);
+            $attributes = $property->getAttributes();
+            foreach ($attributes as $attribute) {
+                $attributeName = $attribute->getName();
+                if (
+                    'Doctrine\ORM\Mapping\ManyToOne' === $attributeName
+                    || 'Doctrine\ORM\Mapping\OneToOne' === $attributeName
+                ) {
+                    $targetFullName = $associationMapping['targetEntity'];
+                    $targetEntity = $this->em->getClassMetadata($targetFullName);
+                    $this->visit($targetEntity, $visited, $sortedEntities);
+                }
             }
         }
 

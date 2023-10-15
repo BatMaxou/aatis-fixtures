@@ -426,4 +426,65 @@ class Faker
 
         return $text;
     }
+
+    /**
+     * Return a json which can be personalize.
+     *
+     * @param array<array{
+     *      type: string,
+     *      parameters?: array<string|int, string|int>
+     * }> $parameters array including the type of data you want for each key of your json
+     */
+    public static function json(array $parameters = []): string
+    {
+        if (empty($parameters)) {
+            return '{}';
+        }
+
+        $returned = [];
+
+        foreach ($parameters as $key => $infos) {
+            $method = $infos['type'];
+            $returned[$key] = isset($infos['parameters']) ? self::$method(...$infos['parameters']) : self::$method();
+        }
+
+        $json = json_encode($returned);
+
+        if (!$json) {
+            return '{}';
+        }
+
+        return $json;
+    }
+
+    /**
+     * Return a string with an array into, which can be personalize.
+     *
+     * @param array<array{
+     *      type: string,
+     *      parameters?: array<string|int, string|int>,
+     *      lenght?: int
+     * }> $parameters array including the type of data you want for each key of your array
+     */
+    public static function array(array $parameters = []): string
+    {
+        if (empty($parameters)) {
+            return '[]';
+        }
+
+        $lenght = $parameters['lenght'] ?? 3;
+
+        if ($lenght < 0) {
+            return '[]';
+        }
+
+        $returned = [];
+
+        for ($i = 0; $i < $lenght; ++$i) {
+            $method = $parameters['type'];
+            $returned[] = isset($parameters['parameters']) ? self::$method(...$parameters['parameters']) : self::$method();
+        }
+
+        return '['.join(', ', $returned).']';
+    }
 }

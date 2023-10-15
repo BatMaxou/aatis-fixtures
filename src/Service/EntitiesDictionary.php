@@ -73,7 +73,10 @@ class EntitiesDictionary
      *
      * @param string $entityName the name of the target entity in snake_case
      *
-     * @return string[]
+     * @return array{}|array<non-empty-string, array{}|array{
+     *    type: string,
+     *    unique?: bool,
+     * }>
      */
     public function getProperties(string $entityName): array
     {
@@ -85,14 +88,53 @@ class EntitiesDictionary
         $properties = $reflection->getProperties();
         $accurateProperties = [];
         foreach ($properties as $property) {
+            $isColumnInDatabase = false;
+            $isJson = false;
+
+            foreach ($property->getAttributes() as $attribute) {
+                if (!str_starts_with($attribute->getName(), 'Doctrine\ORM\Mapping')) {
+                    continue;
+                }
+
+                if (isset($attribute->getArguments()['type']) && 'json' === $attribute->getArguments()['type']) {
+                    $isJson = true;
+                }
+
+                $isColumnInDatabase = true;
+            }
+
+            if (!$isColumnInDatabase) {
+                continue;
+            }
+
             $propertyName = $property->getName();
             if ('id' !== $propertyName) {
+                if ($isJson) {
+                    $accurateProperties[$propertyName]['type'] = 'json';
+
+                    continue;
+                }
+
                 /**
                  * @var \ReflectionNamedType $propertyType
                  */
                 $propertyType = $property->getType();
-                if ('Doctrine\Common\Collections\Collection' !== $propertyType->getName()) {
-                    $accurateProperties[$propertyName] = str_replace('Interface', '', $propertyType->getName());
+                $propertyTypeName = $propertyType->getName();
+
+                foreach ($property->getAttributes() as $attribute) {
+                    if (
+                        (in_array('unique', array_keys($attribute->getArguments())) && $attribute->getArguments()['unique'])
+                        || 'Doctrine\ORM\Mapping\OneToOne' === $attribute->getName()
+                    ) {
+                        $accurateProperties[$propertyName]['unique'] = true;
+                    }
+                }
+
+                if (
+                    'Doctrine\Common\Collections\Collection' !== $propertyTypeName
+                    && 'array' !== $propertyTypeName
+                ) {
+                    $accurateProperties[$propertyName]['type'] = str_replace('Interface', '', $propertyTypeName);
                 }
             }
         }

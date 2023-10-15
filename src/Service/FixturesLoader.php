@@ -12,6 +12,7 @@ class FixturesLoader
 {
     public function __construct(
         private readonly EntitiesDictionary $entitiesDictionary,
+        private readonly ConstructorWarner $constructorWarner,
         private readonly EntityManagerInterface $em
     ) {
     }
@@ -51,7 +52,14 @@ class FixturesLoader
                 foreach ($tableInfos['data'] as $data) {
                     // créer une nouvelle entité
                     $namespace = $this->entitiesDictionary->getEntity($tableName);
-                    $entity = new ($namespace)();
+                    $reflection = new \ReflectionClass($namespace);
+
+                    $entity = null;
+                    try {
+                        $this->constructorWarner->init($reflection->getMethod('__construct'));
+                    } catch (\Throwable) {
+                        $entity = new ($namespace)();
+                    }
 
                     // pour chaque COLONES
                     $indexColumn = 0;
@@ -73,18 +81,29 @@ class FixturesLoader
                             } else {
                                 $value = $data[$indexColumn];
                             }
-                            $setter = 'set'.ucfirst($column);
-                            $entity->$setter($value);
+                            if (null === $entity) {
+                                $this->constructorWarner->addParameter($column, $value);
+                                if ($this->constructorWarner->isComplete()) {
+                                    $entity = new ($namespace)(...$this->constructorWarner->getParameters());
+                                    $this->constructorWarner->refresh();
+                                }
+                            } else {
+                                $setter = 'set'.ucfirst($column);
+                                $entity->$setter($value);
+                            }
                             ++$indexColumn;
                         } else {
                             throw new MissingArgumentException(sprintf('Missing argument n°%d in fixtures of table %s', $indexColumn + 1, $tableName));
                         }
                     }
-                    $this->em->persist($entity);
-                    ++$compt;
+
+                    if (null !== $entity) {
+                        $this->em->persist($entity);
+                        ++$compt;
+                    }
                 }
                 $this->em->flush();
-                $io->info($compt.' row(s) inserted into : '.$tableName);
+                $io->info(sprintf('%d row(s) inserted into : %s', $compt, $tableName));
             }
         }
 

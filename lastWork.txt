@@ -1,0 +1,8 @@
+A faire:
+    - datagenerate avec les uniques (Exception)
+    - options format pour le datetime
+
+dernier travail fait :
+    - phpstan
+    - gerer les 'unique' (unique / OneToOne)
+    - ConstructorWarner
